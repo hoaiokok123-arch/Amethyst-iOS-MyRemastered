@@ -75,7 +75,7 @@ jobs:
       - name: Get gl4es latest commit hash
         id: gl4es-sha
         run: |
-          echo "sha=$(git ls-remote https://github.com/PojavLauncherTeam/gl4es-114-extra refs/heads/master | grep -io '^\S*')" >> $GITHUB_OUTPUT
+          echo "sha=$(git ls-remote https://github.com/AngleAuraMC/gl4es-114-extra refs/heads/master | grep -io '^\S*')" >> $GITHUB_OUTPUT
 
       - name: Cache gl4es
         uses: actions/cache@v4
@@ -89,7 +89,7 @@ jobs:
         if: false && steps.gl4es-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
-          repository: 'PojavLauncherTeam/gl4es-114-extra'
+          repository: 'AngleAuraMC/gl4es-114-extra'
           path: 'gl4es'
 
       - name: Build gl4es
@@ -114,6 +114,19 @@ jobs:
           git add Natives/resources/Frameworks/libgl4es_114.dylib || true
           git commit -am "CI: Update gl4es" || true
           git push || true
+
+      - name: Download MobileGlues prebuilt artifact
+        id: download-mg
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          mkdir -p mobileglues-artifact
+          cd mobileglues-artifact
+          # Download MobileGlues artifact (workflow_run id: 22014226012)
+          gh run download 22014226012 --repo MobileGL-Dev/MobileGlues --name MobileGlues-iOS-dylib --dir .
+          ls -la
+          echo "Artifact downloaded successfully"
 
       - name: Build for ${{ matrix.platform_name }}
         env:

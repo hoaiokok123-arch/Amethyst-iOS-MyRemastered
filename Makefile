@@ -296,23 +296,30 @@ jre: native
 	cp $(WORKINGDIR)/libawt_xawt.dylib $(OUTPUTDIR)/java_runtimes/java-21-openjdk/lib
 	echo '[Amethyst v$(VERSION)] jre - end'
 
+# MobileGlues artifact ID (workflow_run id: 22014226012, artifact id: 5510020012)
+MG_ARTIFACT_ID ?= 5510020012
+
 dep_mg:
 	echo '[Amethyst v$(VERSION)] dep_mg - start'
 	mkdir -p $(WORKINGDIR)/mobileglues
-	cd $(WORKINGDIR)/mobileglues && cmake \
-		-DMACOS="1" \
-		-DCMAKE_CROSSCOMPILING=true \
-		-DCMAKE_SYSTEM_NAME=Darwin \
-		-DCMAKE_SYSTEM_PROCESSOR=aarch64 \
-		-DCMAKE_OSX_SYSROOT="$(SDKPATH)" \
-		-DCMAKE_OSX_ARCHITECTURES=arm64 \
-		-DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 \
-		-DCMAKE_C_FLAGS="-arch arm64" \
-		$(SOURCEDIR)/Natives/external/MobileGlues/src/main/cpp/
-
-	cmake --build $(WORKINGDIR)/mobileglues --config RelWithDebInfo -j$(JOBS) --target mobileglues
-	cp $(WORKINGDIR)/mobileglues/libmobileglues.dylib $(WORKINGDIR)/libmobileglues.dylib
-	cp $(SOURCEDIR)/Natives/external/MobileGlues/src/main/cpp/libraries/ios/libspirv-cross-c-shared.0.dylib $(WORKINGDIR)/libspirv-cross-c-shared.0.dylib
+	@if [ -f "$(SOURCEDIR)/mobileglues-artifact/libmobileglues.dylib" ]; then \
+		echo "Using pre-downloaded MobileGlues artifact"; \
+		cp $(SOURCEDIR)/mobileglues-artifact/libmobileglues.dylib $(WORKINGDIR)/libmobileglues.dylib; \
+	elif [ "$(RUNNER)" = "1" ]; then \
+		echo "Error: MobileGlues artifact not found. Ensure the workflow downloads it first."; \
+		exit 1; \
+	else \
+		echo "Downloading MobileGlues artifact (requires GitHub token)..."; \
+		if [ -n "$(GITHUB_TOKEN)" ]; then \
+			curl -L -H "Authorization: token $(GITHUB_TOKEN)" -o /tmp/mg.zip "https://api.github.com/repos/MobileGL-Dev/MobileGlues/actions/artifacts/$(MG_ARTIFACT_ID)/zip"; \
+			cd /tmp && python3 -c "import zipfile; zipfile.ZipFile('mg.zip').extractall('mg_artifact')"; \
+			cp /tmp/mg_artifact/libmobileglues.dylib $(WORKINGDIR)/libmobileglues.dylib; \
+			rm -rf /tmp/mg.zip /tmp/mg_artifact; \
+		else \
+			echo "Error: GITHUB_TOKEN not set. Please set GITHUB_TOKEN or download manually."; \
+			exit 1; \
+		fi; \
+	fi
 	echo '[Amethyst v$(VERSION)] dep_mg - end'
 
 assets:
@@ -342,6 +349,18 @@ payload: native dep_mg java jre assets
 	cp $(SOURCEDIR)/JavaApp/build/*.jar $(WORKINGDIR)/AngelAuraAmethyst.app/libs/ || exit 1
 	cp -R $(SOURCEDIR)/JavaApp/libs/caciocavallo/* $(WORKINGDIR)/AngelAuraAmethyst.app/libs_caciocavallo || exit 1
 	cp -R $(SOURCEDIR)/JavaApp/libs/caciocavallo17/* $(WORKINGDIR)/AngelAuraAmethyst.app/libs_caciocavallo17 || exit 1
+	# Copy TouchController static library if available
+	if [ -f "$(SOURCEDIR)/TouchController/libproxy_server_ios.a" ]; then \
+		mkdir -p $(WORKINGDIR)/AngelAuraAmethyst.app/Frameworks; \
+		cp $(SOURCEDIR)/TouchController/libproxy_server_ios.a $(WORKINGDIR)/AngelAuraAmethyst.app/Frameworks/ || exit 1; \
+		echo '[Amethyst v$(VERSION)] Copied TouchController device library'; \
+	elif [ -f "$(SOURCEDIR)/TouchController/libproxy_server_ios_simulator.a" ]; then \
+		mkdir -p $(WORKINGDIR)/AngelAuraAmethyst.app/Frameworks; \
+		cp $(SOURCEDIR)/TouchController/libproxy_server_ios_simulator.a $(WORKINGDIR)/AngelAuraAmethyst.app/Frameworks/ || exit 1; \
+		echo '[Amethyst v$(VERSION)] Copied TouchController simulator library'; \
+	else \
+		echo '[Amethyst v$(VERSION)] TouchController library not found, skipping'; \
+	fi
 	$(call METHOD_DIRCHECK,$(OUTPUTDIR)/Payload)
 	cp -R $(WORKINGDIR)/AngelAuraAmethyst.app $(OUTPUTDIR)/Payload
 	if [ '$(SLIMMED_ONLY)' != '1' ]; then \

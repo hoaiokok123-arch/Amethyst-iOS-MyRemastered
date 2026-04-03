@@ -114,11 +114,11 @@ jobs:
           fi
           ccache --max-size=5G || true
 
-      - name: Setup Java 11 (Temurin)
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: '11.0.15+10'
+      - name: Install Java 8 (Temurin) via Homebrew
+        run: |
+          set -e
+          brew install --cask temurin@8 || true
+          /usr/libexec/java_home -V || true
 
       - name: Build for ${{ matrix.platform_name }}
         env:

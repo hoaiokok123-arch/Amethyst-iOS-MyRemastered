@@ -1087,6 +1087,13 @@
 @property (nonatomic, assign) BOOL isLoadingModpacks;
 @property (nonatomic, strong) NSString *modpackSearchQuery;
 
+- (BOOL)isNetworkAvailable;
+- (NSString *)currentInstanceModsPath;
+- (NSString *)displayNameForModpackLoader:(NSString *)loaderIdentifier;
+- (void)registerInstalledModpack:(NSDictionary *)modpack version:(ModVersion *)version modpackDir:(NSString *)modpackDir;
+- (void)showModpackInstallSuccessForName:(NSString *)modpackName profileName:(NSString *)profileName;
+- (void)installModpackFromFile:(NSString *)filePath modpack:(NSDictionary *)modpack version:(ModVersion *)version;
+
 @end
 
 @implementation DownloadViewController
@@ -2555,19 +2562,7 @@
         }];
     };
     [downloader notifyModpackDownloadCompletionIfNeeded];
-    return;
-#if 0
-    
-    __weak typeof(self) weakSelf = self;
-    downloader.modpackDownloadCompletion = ^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.progressVC dismissViewControllerAnimated:YES completion:nil];
-            [weakSelf showSuccessMessage:[NSString stringWithFormat:@"Modpack %@ đã được cài xong", modpack[@"title"]]];
-        });
-    };
 }
-
-#endif
 
 #pragma mark - UITableView DataSource
 

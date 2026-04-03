@@ -378,6 +378,38 @@ static NSString * const kModpacksDirectory = @"modpacks";
     [defaults synchronize];
 }
 
+- (void)registerInstalledModpackWithInfo:(NSDictionary *)modpackInfo
+                             profileName:(NSString *)profileName
+                              modpackDir:(NSString *)modpackDir
+                                filePath:(nullable NSString *)filePath {
+    if (profileName.length == 0 || modpackDir.length == 0) {
+        return;
+    }
+
+    NSMutableDictionary *savedModpack = [modpackInfo mutableCopy] ?: [NSMutableDictionary dictionary];
+    if (savedModpack[@"id"] == nil) {
+        savedModpack[@"id"] = [NSString stringWithFormat:@"installed_%@", NSUUID.UUID.UUIDString];
+    }
+    savedModpack[@"profileName"] = profileName;
+    savedModpack[@"modpackDir"] = modpackDir;
+    savedModpack[@"importDate"] = [NSDate date];
+    if (filePath.length > 0) {
+        savedModpack[@"filePath"] = filePath;
+    }
+
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *modpacks = [[self getImportedModpacks] mutableCopy];
+    NSIndexSet *duplicateIndexes = [modpacks indexesOfObjectsPassingTest:^BOOL(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+        return [obj[@"profileName"] isEqualToString:profileName] || [obj[@"modpackDir"] isEqualToString:modpackDir];
+    }];
+    if (duplicateIndexes.count > 0) {
+        [modpacks removeObjectsAtIndexes:duplicateIndexes];
+    }
+    [modpacks addObject:savedModpack];
+    [defaults setObject:modpacks forKey:kImportedModpacksKey];
+    [defaults synchronize];
+}
+
 #pragma mark - Delete Modpack
 
 - (BOOL)deleteModpack:(NSDictionary *)modpackInfo error:(NSError **)error {

@@ -18,6 +18,7 @@
 #import "LauncherNavigationController.h"
 #import "installer/ModpackInstallViewController.h"
 #import "ModpackImportViewController.h"
+#import "ModpackImportService.h"
 #import <QuartzCore/QuartzCore.h>
 
 #include <sys/time.h>
@@ -1670,6 +1671,11 @@
             [self resetFilters];
         }]];
     } else if (tabIndex == 3) {
+        [alert addAction:[UIAlertAction actionWithTitle:@"Modpack đã tải"
+                                                  style:UIAlertActionStyleDefault
+                                                handler:^(UIAlertAction * _Nonnull action) {
+            [self openImportModpackView];
+        }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"Nhập modpack cục bộ"
                                                   style:UIAlertActionStyleDefault
                                                 handler:^(UIAlertAction * _Nonnull action) {
@@ -2405,6 +2411,62 @@
     [self presentViewController:nav animated:YES completion:nil];
 }
 
+- (NSString *)displayNameForModpackLoader:(NSString *)loaderIdentifier {
+    if (loaderIdentifier.length == 0) {
+        return @"Unknown";
+    }
+
+    NSDictionary<NSString *, NSString *> *displayNames = @{
+        @"forge": @"Forge",
+        @"fabric": @"Fabric",
+        @"quilt": @"Quilt",
+        @"neoforge": @"NeoForge"
+    };
+    NSString *normalized = loaderIdentifier.lowercaseString;
+    return displayNames[normalized] ?: loaderIdentifier.capitalizedString;
+}
+
+- (void)registerInstalledModpack:(NSDictionary *)modpack version:(ModVersion *)version modpackDir:(NSString *)modpackDir {
+    NSString *profileName = PLProfiles.current.selectedProfileName;
+    if (profileName.length == 0 || modpackDir.length == 0) {
+        return;
+    }
+
+    NSString *versionName = version.versionNumber.length > 0 ? version.versionNumber : version.name;
+    NSString *identifier = modpack[@"id"] ?: NSUUID.UUID.UUIDString;
+    NSDictionary *savedInfo = @{
+        @"id": [NSString stringWithFormat:@"%@-%@", identifier, versionName.length > 0 ? versionName : NSUUID.UUID.UUIDString],
+        @"name": modpack[@"title"] ?: modpack[@"name"] ?: @"Modpack",
+        @"version": versionName ?: @"",
+        @"minecraftVersion": version.gameVersions.firstObject ?: @"unknown",
+        @"loader": [self displayNameForModpackLoader:version.loaders.firstObject],
+        @"loaderVersion": @"",
+        @"source": @"modrinth"
+    };
+
+    ModpackImportService *importService = [[ModpackImportService alloc] init];
+    [importService registerInstalledModpackWithInfo:savedInfo
+                                        profileName:profileName
+                                         modpackDir:modpackDir
+                                           filePath:nil];
+}
+
+- (void)showModpackInstallSuccessForName:(NSString *)modpackName profileName:(NSString *)profileName {
+    NSString *message = profileName.length > 0
+        ? [NSString stringWithFormat:@"Modpack %@ đã cài xong.\nHồ sơ đang dùng: %@", modpackName, profileName]
+        : [NSString stringWithFormat:@"Modpack %@ đã cài xong.", modpackName];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cài đặt thành công"
+                                                                   message:message
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Mở danh sách modpack"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction * _Nonnull action) {
+        [self openImportModpackView];
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:nil]];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 - (void)installModpack:(UIButton *)sender {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:sender.tag inSection:0];
     [self installModpackAtIndexPath:indexPath];
@@ -2462,14 +2524,14 @@
                 NSString *tempPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mrpack", modpack[@"id"]]];
                 [[NSFileManager defaultManager] removeItemAtPath:tempPath error:nil];
                 [[NSFileManager defaultManager] moveItemAtPath:location.path toPath:tempPath error:nil];
-                [self installModpackFromFile:tempPath modpack:modpack];
+                [self installModpackFromFile:tempPath modpack:modpack version:version];
             }];
         });
     }];
     [task resume];
 }
 
-- (void)installModpackFromFile:(NSString *)filePath modpack:(NSDictionary *)modpack {
+- (void)installModpackFromFile:(NSString *)filePath modpack:(NSDictionary *)modpack version:(ModVersion *)version {
     MinecraftResourceDownloadTask *downloader = [[MinecraftResourceDownloadTask alloc] init];
     NSString *destPath = [NSString stringWithFormat:@"%s/custom_gamedir/%@", getenv("POJAV_GAME_DIR"), modpack[@"id"]];
     [[NSFileManager defaultManager] createDirectoryAtPath:destPath withIntermediateDirectories:YES attributes:nil error:nil];
@@ -2479,6 +2541,22 @@
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:self.progressVC];
     nav.modalPresentationStyle = UIModalPresentationFormSheet;
     [self presentViewController:nav animated:YES completion:nil];
+
+    void (^existingCompletion)(void) = downloader.modpackDownloadCompletion;
+    __weak typeof(self) installWeakSelf = self;
+    downloader.modpackDownloadCompletion = ^{
+        if (existingCompletion) {
+            existingCompletion();
+        }
+        [installWeakSelf registerInstalledModpack:modpack version:version modpackDir:destPath];
+        NSString *profileName = PLProfiles.current.selectedProfileName;
+        [installWeakSelf.progressVC dismissViewControllerAnimated:YES completion:^{
+            [installWeakSelf showModpackInstallSuccessForName:modpack[@"title"] ?: @"Modpack" profileName:profileName];
+        }];
+    };
+    [downloader notifyModpackDownloadCompletionIfNeeded];
+    return;
+#if 0
     
     __weak typeof(self) weakSelf = self;
     downloader.modpackDownloadCompletion = ^{
@@ -2488,6 +2566,8 @@
         });
     };
 }
+
+#endif
 
 #pragma mark - UITableView DataSource
 

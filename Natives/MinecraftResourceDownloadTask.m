@@ -12,6 +12,7 @@
 
 @interface MinecraftResourceDownloadTask ()
 @property AFURLSessionManager* manager;
+@property(nonatomic) BOOL modpackCompletionHandled;
 @end
 
 @implementation MinecraftResourceDownloadTask
@@ -177,6 +178,7 @@
         } else {
             progress.totalUnitCount = progress.completedUnitCount;
             if (success) success();
+            [weakSelf notifyModpackDownloadCompletionIfNeeded];
         }
     }];
 
@@ -368,6 +370,7 @@
                 self.progress.completedUnitCount = 1;
                 self.textProgress.totalUnitCount = 1;
                 self.textProgress.completedUnitCount = 1;
+                [self notifyModpackDownloadCompletionIfNeeded];
                 return;
             }
             [libTasks makeObjectsPerformSelector:@selector(resume)];
@@ -411,10 +414,28 @@
     self.progress.totalUnitCount = 1;
     [self.fileList removeAllObjects];
     [self.progressList removeAllObjects];
+    self.modpackCompletionHandled = NO;
+    self.modpackDownloadCompletion = nil;
+}
+
+- (void)notifyModpackDownloadCompletionIfNeeded {
+    if (self.modpackCompletionHandled || self.progress.cancelled || !self.modpackDownloadCompletion) {
+        return;
+    }
+    if (self.progress.totalUnitCount <= 0 || self.progress.completedUnitCount < self.progress.totalUnitCount) {
+        return;
+    }
+
+    self.modpackCompletionHandled = YES;
+    void (^completion)(void) = self.modpackDownloadCompletion;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        completion();
+    });
 }
 
 - (void)finishDownloadWithErrorString:(NSString *)error {
     [self.progress cancel];
+    self.modpackCompletionHandled = YES;
     [self.manager invalidateSessionCancelingTasks:YES resetSession:YES];
     showDialog(localize(@"Error", nil), error);
     self.handleError();

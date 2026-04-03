@@ -29,6 +29,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.title = @"Modpack đã tải";
     self.title = @"Nhập modpack";
     
     // 设置毛玻璃背景
@@ -48,18 +49,21 @@
     
     [self setupUI];
     [self loadImportedModpacks];
+    self.title = @"Modpack đã tải";
 }
 
 - (void)setupUI {
     // 导入按钮
     self.importButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.importButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.importButton setTitle:@"Nhập modpack cục bộ" forState:UIControlStateNormal];
     [self.importButton setTitle:@"Chọn tệp modpack" forState:UIControlStateNormal];
     [self.importButton setImage:[UIImage systemImageNamed:@"doc.badge.plus"] forState:UIControlStateNormal];
     self.importButton.backgroundColor = [UIColor systemBlueColor];
     [self.importButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     self.importButton.layer.cornerRadius = 10;
     self.importButton.titleLabel.font = [UIFont boldSystemFontOfSize:16];
+    [self.importButton setTitle:@"Nhập modpack cục bộ" forState:UIControlStateNormal];
     [self.importButton addTarget:self action:@selector(selectModpackFile) forControlEvents:UIControlEventTouchUpInside];
     [self.backgroundBlurView.contentView addSubview:self.importButton];
     
@@ -84,8 +88,10 @@
     self.emptyLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.emptyLabel.textAlignment = NSTextAlignmentCenter;
     self.emptyLabel.textColor = [UIColor secondaryLabelColor];
+    self.emptyLabel.text = @"Chưa có modpack nào\nHãy tải ở tab modpack hoặc nhập tệp cục bộ";
     self.emptyLabel.text = @"Chưa có modpack nào được nhập\nNhấn nút phía trên để nhập";
     self.emptyLabel.numberOfLines = 0;
+    self.emptyLabel.text = @"Chưa có modpack nào\nHãy tải ở tab modpack hoặc nhập tệp cục bộ";
     [self.backgroundBlurView.contentView addSubview:self.emptyLabel];
     
     // 设置约束

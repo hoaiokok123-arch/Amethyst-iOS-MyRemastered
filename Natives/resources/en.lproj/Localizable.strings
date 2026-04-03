@@ -290,6 +290,7 @@
 "preference.detail.custom_env" = "This option is under construction. Create and edit custom_env.txt in the meantime.";
 
 "preference.title.debug_universal_script_jit" = "Use Universal StikDebug Script";
+"preference.detail.debug_universal_script_jit" = "Use the Universal Script workflow for JIT when your device requires the TXM workaround.";
 "preference.title.debug_always_attached_jit" = "Keep attached to StikDebug";
 "preference.detail.debug_always_attached_jit" = "Enable this if your mods require loading .dylib at runtime. When this is on, StikDebug's PiP should not be closed during gameplay. Requires Universal Script enabled";
 "preference.title.debug_skip_wait_jit" = "Skip \"Waiting for JIT\" dialog";
@@ -367,6 +368,10 @@
 "preference.title.appicon-custom" = "Custom";
 "preference.title.custom_appicon" = "Custom App Icon";
 "preference.detail.custom_appicon" = "Select a custom image to use as the app icon";
+"preference.title.launcher_background" = "Launcher background";
+"preference.detail.launcher_background" = "Choose a custom image or video background for the launcher.";
+"preference.title.ai_crash_fix" = "AI crash fixer";
+"preference.detail.ai_crash_fix" = "Open the AI-assisted tool to analyze crashes and suggest fixes.";
 "提示" = "Notice";
 
 // Announcement messages
@@ -434,6 +439,27 @@
 "custom_controls.orientation.right" = "Right";
 "custom_controls.orientation.free" = "Free";
 
+// Preference key fallbacks
+"preference.detail.debug_show_layout_bounds" = "Show clip bounds, margins, and other layout edges.";
+"preference.detail.debug_show_layout_overlap" = "Overlay each view with transparent colors to reveal overlapping areas.";
+"preference.detail.enable_altkit" = "When enabled, Amethyst will try to connect to local AltServer instances to enable JIT.";
+"preference.detail.java_home" = "Java 8 is used by default for those versions. Enable this option to force Java 17 instead, but mod compatibility is not guaranteed.";
+"preference.detail.jitstreamer_server" = "Allows you to change to a custom JitStreamer server IP address, for example for self-hosted instances. Leave this option as-is if you use the default JitStreamer servers.";
+"preference.section.footer" = "";
+"preference.section.footer.control" = "";
+"preference.section.footer.java" = "";
+"preference.title.debug_show_layout_bounds" = "Show layout bounds";
+"preference.title.debug_show_layout_overlap" = "Show layout overlap";
+"preference.title.disable_gesture" = "Disable gestures";
+"preference.title.done" = "Done";
+"preference.title.enable_altkit" = "Enable AltKit integration";
+"preference.title.java_home" = "Use Java 17 for Minecraft < 1.17";
+"preference.title.jitstreamer_server" = "JitStreamer server IP";
+"preference.title.renderer.angle" = "ANGLE";
+"preference.title.renderer.auto" = "Auto";
+"preference.title.renderer.gl4es" = "holy gl4es";
+"preference.title.renderer.zink" = "Zink";
+
 "installer.forge.search_versions" = "Search versions";
 "installer.forge.download_cancelled.title" = "Download cancelled";
 "installer.forge.download_cancelled.message" = "The download has been cancelled.";
@@ -490,7 +516,10 @@
 "preference.placeholder.version" = "Specify version...";
 "preference.popup.touch_info.title" = "TouchController Information";
 "preference.popup.touch_info.message" = "TouchController adds touch controls to Minecraft Java Edition. Make sure the corresponding mod is installed in your instance before enabling it here.";
+"preference.title.mod_touch_enable" = "TouchController";
+"preference.detail.mod_touch_enable" = "Configure the TouchController bridge mode and extra touch-control options.";
 "preference.title.two_finger_keyboard" = "Two-finger keyboard";
+"preference.detail.two_finger_keyboard" = "Open the in-game keyboard by pressing and holding the screen with two fingers.";
 "preference.two_finger_keyboard.status.enabled" = "Current status: Enabled";
 "preference.two_finger_keyboard.status.disabled" = "Current status: Disabled";
 "preference.two_finger_keyboard.message" = "%@\n\nAfter enabling, press and hold the screen with two fingers in game to open the keyboard.\nThis feature was made by WeiErLiTeo.";

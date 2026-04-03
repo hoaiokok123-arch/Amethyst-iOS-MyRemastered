@@ -178,6 +178,8 @@
 "preference.detail.resolution" = "Cho phép thay đổi độ phân giải trò chơi.";
 "preference.title.max_framerate" = "Tốc độ Khung Hình tối đa";
 "preference.detail.max_framerate" = "Cho phép bạn giới hạn tốc độ khung hình của trò chơi ở mức 60FPS trên màn hình ProMotion.";
+"preference.title.performance_hud" = "Hiện HUD hiệu năng";
+"preference.detail.performance_hud" = "Khi khả dụng, hiển thị lớp phủ theo dõi hiệu năng.";
 
 "preference.title.fullscreen_airplay" = "AirPlay toàn màn hình";
 "preference.detail.fullscreen_airplay" = "Cho phép chiếu toàn màn hình cửa sổ game thay vì chiếu mọi thứ trên màn hình ngoài.";
@@ -185,17 +187,27 @@
 "preference.detail.silence_other_audio" = "Bật để cho phép Amethyst tạm dừng âm thanh từ các ứng dụng khác, chẳng hạn như Âm nhạc, khi khởi chạy trò chơi.";
 "preference.title.silence_with_switch" = "Tắt âm thanh bằng công tắc im lặng";
 "preference.detail.silence_with_switch" = "Bật để tắt âm thanh khi Chế độ im lặng được bật. Tai nghe và loa ngoài không bị ảnh hưởng.";
+"preference.title.allow_microphone" = "Cho phép dùng micro";
+"preference.detail.allow_microphone" = "Chỉ bật mục này nếu bạn dùng mod voice chat. Tùy chọn công tắc im lặng sẽ bị bỏ qua và chất lượng âm thanh từ ứng dụng khác có thể bị ảnh hưởng.";
 "preference.title.default_gamepad_ctrl" = "Cấu hình bộ điều khiển";
 "preference.title.hardware_hide" = "Ẩn điều khiển khi phần cứng được kết nối";
 "preference.detail.hardware_hide" = "Bật hành vi tự động tắt lớp phủ điều khiển trên màn hình khi chuột hoặc bộ điều khiển trò chơi được kết nối.";
+"preference.title.recording_hide" = "Ẩn điều khiển khỏi quay màn hình";
+"preference.detail.recording_hide" = "Ẩn điều khiển khỏi ảnh chụp màn hình và quay màn hình trong khi chúng vẫn hiện trên thiết bị.";
 "preference.title.gesture_mouse" = "Mouse gestures";
 "preference.detail.gesture_mouse" = "Bật các cử chỉ, chẳng hạn như nhấn để đặt khối, giữ để phá khối, cuộn bằng 2";
 "preference.title.gesture_hotbar" = "Cử Chỉ Hotbar";
 "preference.detail.gesture_hotbar" = "Cho phép các cử chỉ, chẳng hạn như chạm vào khe thanh nóng, trao đổi vật phẩm giữa các tay, ném vật phẩm";
+"preference.title.disable_haptics" = "Tắt rung điều khiển";
+"preference.detail.disable_haptics" = "Tắt phản hồi rung trong game để tiết kiệm pin.";
 "preference.title.press_duration" = "Độ dài nhấn giữ (ms)";
 "preference.detail.press_duration" = "Khoảng thời gian chạm giữ để phá khối và ném đồ vật.";
 "preference.title.button_scale" = "Độ rộng nút trên màn hình (%)";
 "preference.detail.button_scale" = "Tăng lên nếu nút quá nhỏ, đặc biệt với người dùng iPad.";
+"preference.title.custom_mouse_pointer" = "Con trỏ chuột tùy chỉnh";
+"preference.detail.custom_mouse_pointer" = "Chọn ảnh tùy chỉnh làm giao diện con trỏ chuột trong game.";
+"preference.title.reset_mouse_pointer" = "Đặt lại con trỏ chuột";
+"preference.detail.reset_mouse_pointer" = "Khôi phục con trỏ chuột về giao diện mặc định.";
 "preference.title.mouse_scale" = "Độ lớn của chuột (%)";
 "preference.detail.mouse_scale" = "Đổi kích thước chuột ảo";
 "preference.title.mouse_speed" = "Tốc độ chuột (%)";
@@ -217,6 +229,8 @@
 "preference.title.java_args" = "Các chỉ số chạy JVM";
 "preference.detail.java_args" = "Truyền đối số cho Java khi khởi chạy Minecraft. Hãy cẩn thận, điều này có thể khiến trò chơi bị sập nếu sửa đổi không đúng cách.";
 "preference.placeholder.java_args" = "Nhập các chỉ số...";
+"preference.title.env_variables" = "Biến môi trường";
+"preference.detail.env_variables" = "Đặt biến môi trường tùy chỉnh khi khởi chạy Minecraft. Hãy cẩn thận vì cấu hình sai có thể làm game bị sập.";
 "preference.title.auto_ram" = "RAM tự động";
 "preference.detail.auto_ram" = "Bật tự động điều chỉnh RAM";
 "preference.warn.auto_ram" = "Tắt tùy chọn này trên thiết bị chưa được jailbreak có thể gây ra sự thiếu ổn định. Chú ý khi tiếp tục.";
@@ -226,6 +240,10 @@
 "preference.title.custom_env" = "Các chỉ số môi trường";
 "preference.detail.custom_env" = "Tùy chọn này đang được xây dựng. Trong khi chờ đợi, hãy tạo và chỉnh sửa custom_env.txt.";
 
+"preference.title.debug_universal_script_jit" = "Dùng Universal StikDebug Script";
+"preference.detail.debug_universal_script_jit" = "Dùng quy trình Universal Script cho JIT khi thiết bị của bạn cần TXM workaround.";
+"preference.title.debug_always_attached_jit" = "Giữ kết nối với StikDebug";
+"preference.detail.debug_always_attached_jit" = "Bật mục này nếu mod của bạn cần nạp .dylib lúc chạy. Khi bật, không được đóng cửa sổ PiP của StikDebug trong lúc chơi. Yêu cầu Universal Script.";
 "preference.title.debug_skip_wait_jit" = "Bỏ qua thông bảo \"Đang đợi JIT\"";
 "preference.detail.debug_skip_wait_jit" = "Tùy chọn này không cho phép chạy trò chơi mà không có JIT, thay vào đó trình khởi chạy sẽ bỏ qua việc kiểm tra. Hữu ích nếu kiểm tra thất bại với một số trình jailbreak.";
 "preference.title.debug_ipad_ui" = "Mở khóa giao diện iPadOS";
@@ -355,9 +373,19 @@
 "profile.create.modpack" = "Modpack";
 
 "preference.title.appicon-custom" = "Tùy chỉnh";
+"preference.title.custom_appicon" = "Biểu tượng ứng dụng tùy chỉnh";
+"preference.detail.custom_appicon" = "Chọn ảnh tùy chỉnh để dùng làm biểu tượng ứng dụng.";
+"preference.title.launcher_background" = "Nền launcher";
+"preference.detail.launcher_background" = "Chọn ảnh hoặc video nền tùy chỉnh cho launcher.";
 "preference.title.confirm.delete_runtime" = "%@ sẽ bị xóa";
 "preference.title.download_source-official" = "Nguồn chính thức";
 "preference.title.download_source-bmclapi" = "Gương BMCLAPI";
+"preference.title.news_url" = "Đường dẫn trang tin";
+"preference.detail.news_url" = "Đặt URL cho trang tin tức trong launcher.";
+"preference.title.reset_news_url" = "Đặt lại URL trang tin";
+"preference.detail.reset_news_url" = "Khôi phục URL trang tin về giá trị mặc định.";
+"preference.title.ai_crash_fix" = "AI sửa lỗi crash";
+"preference.detail.ai_crash_fix" = "Mở công cụ AI để phân tích log crash và gợi ý cách sửa.";
 "preference.title.manage_runtime" = "Quản lý runtime";
 "preference.manage_runtime.header.default" = "Phiên bản Java ưu tiên";
 "preference.manage_runtime.header.invalid" = "Runtime không hợp lệ";
@@ -369,7 +397,10 @@
 "preference.placeholder.version" = "Chọn phiên bản...";
 "preference.popup.touch_info.title" = "Thông tin TouchController";
 "preference.popup.touch_info.message" = "TouchController thêm điều khiển cảm ứng cho Minecraft Java Edition. Hãy chắc chắn mod tương ứng đã được cài trong phiên chơi trước khi bật tại đây.";
+"preference.title.mod_touch_enable" = "TouchController";
+"preference.detail.mod_touch_enable" = "Cấu hình chế độ cầu nối TouchController và các tùy chọn cảm ứng bổ sung.";
 "preference.title.two_finger_keyboard" = "Gọi bàn phím bằng hai ngón";
+"preference.detail.two_finger_keyboard" = "Mở bàn phím trong game bằng cách chạm giữ màn hình với hai ngón tay.";
 "preference.two_finger_keyboard.status.enabled" = "Trạng thái hiện tại: Đang bật";
 "preference.two_finger_keyboard.status.disabled" = "Trạng thái hiện tại: Đang tắt";
 "preference.two_finger_keyboard.message" = "%@\n\nSau khi bật, hãy chạm giữ màn hình bằng hai ngón trong game để mở bàn phím.\nTính năng này do WeiErLiTeo thực hiện.";
@@ -418,6 +449,21 @@
 "custom_controls.orientation.up" = "Lên";
 "custom_controls.orientation.right" = "Phải";
 "custom_controls.orientation.free" = "Tự do";
+
+// Preference key fallbacks
+"preference.detail.download_source" = "Chọn nguồn tải xuống cho phiên bản, mod và dữ liệu game.";
+"preference.placeholder.env_variables" = "Nhập biến môi trường...";
+"preference.section.footer" = "";
+"preference.section.footer.control" = "";
+"preference.section.footer.java" = "";
+"preference.title.disable_gesture" = "Tắt cử chỉ";
+"preference.title.done" = "Hoàn tất";
+"preference.title.download_source" = "Nguồn tải xuống";
+"preference.title.renderer.angle" = "ANGLE";
+"preference.title.renderer.auto" = "Tự động";
+"preference.title.renderer.gl4es" = "gl4es Thần Thánh";
+"preference.title.renderer.release.mg" = "MobileGlues (1.17+) - xuất OpenGL 4.0, THỬ NGHIỆM";
+"preference.title.renderer.zink" = "Zink";
 "custom_controls.error.open_file" = "Không thể mở %@: %@";
 "custom_controls.error.dynamic_position" = "Lỗi xử lý vị trí động";
 

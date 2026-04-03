@@ -20,6 +20,11 @@ NS_ASSUME_NONNULL_BEGIN
 // 获取已导入的整合包列表
 - (NSArray<NSDictionary *> *)getImportedModpacks;
 
+- (void)registerInstalledModpackWithInfo:(NSDictionary *)modpackInfo
+                             profileName:(NSString *)profileName
+                              modpackDir:(NSString *)modpackDir
+                                filePath:(nullable NSString *)filePath;
+
 // 删除已导入的整合包
 - (BOOL)deleteModpack:(NSDictionary *)modpackInfo error:(NSError **)error;
 

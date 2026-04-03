@@ -399,3 +399,118 @@
 "preference.touchcontroller.vibrate.intensity.medium" = "Medium";
 "preference.touchcontroller.vibrate.intensity.heavy" = "Heavy";
 "preference.touchcontroller.moveview.enable" = "Enable Move View";
+
+// Added localization keys
+"Cancel" = "Cancel";
+"Custom" = "Custom";
+"Default" = "Default";
+"Delete" = "Delete";
+"Done" = "Done";
+"Edit profile" = "Edit profile";
+"Error" = "Error";
+"Height" = "Height";
+"New" = "New";
+"None" = "None";
+"Notice" = "Notice";
+"OK" = "OK";
+"Processing" = "Processing";
+"Release" = "Release";
+"Rename" = "Rename";
+"Share" = "Share";
+"Sign in" = "Sign in";
+"Success" = "Success";
+"Warning" = "Warning";
+"Width" = "Width";
+
+"auth.base.error.saving_file" = "Error while saving file";
+"auth.microsoft.error.load_keychain" = "Failed to load account tokens from keychain.";
+"auth.microsoft.error.save_keychain" = "Failed to save account tokens to keychain.";
+
+"custom_controls.error.dynamic_position" = "Error processing dynamic position";
+"custom_controls.error.open_file" = "Could not open %@: %@";
+"custom_controls.orientation.down" = "Down";
+"custom_controls.orientation.left" = "Left";
+"custom_controls.orientation.up" = "Up";
+"custom_controls.orientation.right" = "Right";
+"custom_controls.orientation.free" = "Free";
+
+"installer.forge.search_versions" = "Search versions";
+"installer.forge.download_cancelled.title" = "Download cancelled";
+"installer.forge.download_cancelled.message" = "The download has been cancelled.";
+"installer.forge.loading" = "Loading...";
+"installer.forge.download_complete.title" = "Download complete";
+"installer.forge.download_complete.message" = "%@ installer will now run. After installation completes, you will need to restart the app.";
+"installer.forge.error_loading_versions" = "Error loading versions";
+"installer.forge.version_type.recommended" = "Recommended";
+"installer.forge.version_type.beta" = "Beta";
+"installer.forge.version_type.alpha" = "Alpha";
+
+"java.error.insufficient_memory" = "Insufficient contiguous virtual memory space. Lower memory allocation and try again.";
+
+"launcher.menu.technoblade_tribute" = "Technoblade never dies!";
+"launcher.menu.fogg05_tribute" = "To the one who colored the blocks";
+
+"login.cancelled" = "Login cancelled";
+"login.error.unable_to_open_safari" = "Unable to open Safari.";
+
+"mods.title" = "Mods";
+"mods.online_search" = "Online";
+"mods.search.placeholder" = "Search mods...";
+"mods.mode.local" = "Local Mods";
+"mods.mode.online" = "Online Search (Modrinth)";
+"mods.search.local.placeholder" = "Search local mods...";
+"mods.search.online.placeholder" = "Search Modrinth...";
+"mods.empty.local" = "No mods found";
+"mods.empty.local.none" = "No local mods found";
+"mods.empty.online.prompt" = "Enter keywords to search online";
+"mods.empty.online.none" = "No online results found";
+"mods.delete.confirm.title" = "Delete mod";
+"mods.delete.confirm.message" = "Are you sure you want to delete %@?\nThis action cannot be undone.";
+"mods.delete.failed" = "Delete failed";
+"mods.invalid_download_link" = "No valid download link was found.";
+"mods.downloading.title" = "Downloading";
+"mods.download.failed" = "Download failed";
+"mods.download.success" = "Download successful";
+"mods.download.success.message" = "%@ was installed successfully.";
+"mods.link.unavailable.title" = "Link unavailable";
+"mods.link.unavailable.message" = "This mod does not have an online link available.";
+"mods.open_link_failed" = "Unable to open link";
+"mods.action.download" = "Download";
+"mods.filter.all" = "All";
+"mods.filter.game.loading" = "Game version: Loading...";
+"mods.filter.loader.loading" = "Loader: Loading...";
+"mods.filter.game.menu_title" = "Select game version";
+"mods.filter.loader.menu_title" = "Select loader";
+"mods.filter.game.current" = "Game version: %@";
+"mods.filter.loader.current" = "Loader: %@";
+"mods.version.unknown_date" = "Unknown date";
+"mods.version.unknown_size" = "Unknown size";
+
+"preference.crop_image" = "Crop image";
+"preference.placeholder.version" = "Specify version...";
+"preference.popup.touch_info.title" = "TouchController Information";
+"preference.popup.touch_info.message" = "TouchController adds touch controls to Minecraft Java Edition. Make sure the corresponding mod is installed in your instance before enabling it here.";
+"preference.title.two_finger_keyboard" = "Two-finger keyboard";
+"preference.two_finger_keyboard.status.enabled" = "Current status: Enabled";
+"preference.two_finger_keyboard.status.disabled" = "Current status: Disabled";
+"preference.two_finger_keyboard.message" = "%@\n\nAfter enabling, press and hold the screen with two fingers in game to open the keyboard.\nThis feature was made by WeiErLiTeo.";
+"preference.two_finger_keyboard.action.enable" = "Enable";
+"preference.two_finger_keyboard.action.disable" = "Disable";
+"preference.two_finger_keyboard.enabled" = "Two-finger keyboard is enabled.";
+"preference.two_finger_keyboard.disabled" = "Two-finger keyboard is disabled.";
+"preference.custom_icon.processing_message" = "Processing the selected image...";
+"preference.custom_icon.error.get_selected_image" = "Unable to get the selected image.";
+"preference.custom_icon.saved" = "Image saved. You can now select the custom app icon in Settings.";
+"preference.custom_icon.save_failed" = "Failed to save the custom app icon.";
+"preference.custom_icon.crop_cancelled" = "Image cropping was cancelled.";
+"preference.custom_icon.selection_cancelled" = "Image selection was cancelled.";
+"preference.custom_icon.setup_required" = "Set a custom app icon first: Settings > Custom App Icon";
+"preference.mouse_pointer.updated" = "Mouse pointer updated.";
+"preference.mouse_pointer.save_failed" = "Failed to save the mouse pointer.";
+"preference.mouse_pointer.reset" = "Mouse pointer reset to default.";
+
+"profile.create.vanilla" = "Vanilla";
+"profile.create.fabric_quilt" = "Fabric/Quilt";
+"profile.create.forge" = "Forge";
+"profile.create.modpack" = "Modpack";
+"profile.manage_mods" = "Manage Mods";

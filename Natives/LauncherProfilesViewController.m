@@ -47,24 +47,24 @@ typedef NS_ENUM(NSUInteger, LauncherProfilesTableSection) {
     options:UIMenuOptionsDisplayInline
     children:@[
         [UIAction
-            actionWithTitle:@"Vanilla" image:nil
+            actionWithTitle:localize(@"profile.create.vanilla", nil) image:nil
             identifier:@"vanilla" handler:^(UIAction *action) {
                 [self actionEditProfile:@{
                     @"name": @"",
                     @"lastVersionId": @"latest-release"}];
             }],
         [UIAction
-            actionWithTitle:@"Fabric/Quilt" image:nil
+            actionWithTitle:localize(@"profile.create.fabric_quilt", nil) image:nil
             identifier:@"fabric_or_quilt" handler:^(UIAction *action) {
                 [self actionCreateFabricProfile];
             }],
         [UIAction
-            actionWithTitle:@"Forge" image:nil
+            actionWithTitle:localize(@"profile.create.forge", nil) image:nil
             identifier:@"forge" handler:^(UIAction *action) {
                 [self actionCreateForgeProfile];
             }],
         [UIAction
-            actionWithTitle:@"Modpack" image:nil
+            actionWithTitle:localize(@"profile.create.modpack", nil) image:nil
             identifier:@"modpack" handler:^(UIAction *action) {
                 [self actionCreateModpackProfile];
             }],
@@ -175,7 +175,7 @@ typedef NS_ENUM(NSUInteger, LauncherProfilesTableSection) {
         cell.accessoryView = view;
     } else if (row == 2) {
         cell.imageView.image = [UIImage systemImageNamed:@"puzzlepiece.extension"];
-        cell.textLabel.text = @"管理 Mod";
+        cell.textLabel.text = localize(@"profile.manage_mods", nil);
         cell.detailTextLabel.text = nil;
     }
 }

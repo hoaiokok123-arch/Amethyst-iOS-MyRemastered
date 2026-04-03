@@ -199,6 +199,18 @@ static GameSurfaceView* pojavWindow;
 #pragma mark - TouchController Static Library Support
 
 // 启动 TouchController 消息接收循环
+- (NSInteger)activeTouchControllerMode {
+    if (!getPrefBool(@"control.mod_touch_enable")) {
+        return 0;
+    }
+
+    NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    if (mode == 2 && self.touchControllerTransportHandle < 0) {
+        return 0;
+    }
+    return mode;
+}
+
 - (void)startTouchControllerMessageLoop {
     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -478,12 +490,6 @@ static GameSurfaceView* pojavWindow;
     }
 
     [feedbackGenerator impactOccurred];
-
-    // 同时发送 VibrateMessage 到 TouchController
-    if (self.touchControllerTransportHandle >= 0) {
-        NSData *messageData = [self encodeVibrateMessageWithKind:kind];
-        [TouchControllerBridge sendToTransport:self.touchControllerTransportHandle data:messageData];
-    }
 }
 
 #pragma mark - TouchController MoveView Support
@@ -634,6 +640,7 @@ static GameSurfaceView* pojavWindow;
     self = [super init];
     if (self) {
         self.metadata = metadata;
+        self.touchControllerTransportHandle = -1;
     }
     return self;
 }
@@ -809,8 +816,8 @@ static GameSurfaceView* pojavWindow;
     self.touchSender = [[TouchSender alloc] init];
 
     // 初始化 TouchController 静态库 Transport
+    NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
     if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
         if (mode == 2 && [TouchControllerBridge isTouchControllerAvailable]) {
             // 静态库模式：创建 Transport
             self.touchControllerTransportHandle = [TouchControllerBridge createTransportWithName:@"/tmp/touchcontroller.sock"];
@@ -1525,8 +1532,8 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 
     [super touchesBegan:touches withEvent:event];
 
-    if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    NSInteger mode = [self activeTouchControllerMode];
+    if (mode != 0) {
 
         if (mode == 1) {  // UDP 模式
             for (UITouch *touch in touches) {
@@ -1572,8 +1579,8 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    NSInteger mode = [self activeTouchControllerMode];
+    if (mode != 0) {
 
         if (mode == 1) {  // UDP 模式
             for (UITouch *touch in touches) {
@@ -1620,8 +1627,8 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    NSInteger mode = [self activeTouchControllerMode];
+    if (mode != 0) {
 
         if (mode == 1) {  // UDP 模式
             for (UITouch *touch in touches) {
@@ -1649,8 +1656,8 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    NSInteger mode = [self activeTouchControllerMode];
+    if (mode != 0) {
 
         if (mode == 1) {  // UDP 模式
             for (UITouch *touch in touches) {

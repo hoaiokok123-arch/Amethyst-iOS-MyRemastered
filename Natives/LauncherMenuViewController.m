@@ -113,7 +113,7 @@
     NSString* date = [dateFormatter stringFromDate:NSDate.date];
     if([date isEqualToString:@"06-29"] || [date isEqualToString:@"06-30"] || [date isEqualToString:@"07-01"]) {
         [self.options addObject:(id)[LauncherMenuCustomItem
-                                     title:@"Technoblade never dies!"
+                                     title:localize(@"launcher.menu.technoblade_tribute", nil)
                                      imageName:@"" action:^{
             openLink(self, [NSURL URLWithString:@"https://www.bilibili.com/video/BV1RG411s7fw"]);
         }]];
@@ -122,7 +122,7 @@
     // 零雾05_Fogg05彩蛋 - 每年12月27日、28日、29日显示
     if([date isEqualToString:@"12-27"] || [date isEqualToString:@"12-28"] || [date isEqualToString:@"12-29"]) {
         [self.options addObject:(id)[LauncherMenuCustomItem
-                                     title:@"致那个为方块上色的人"
+                                     title:localize(@"launcher.menu.fogg05_tribute", nil)
                                      imageName:@"" action:^{
             NSString *urlString = @"https://wiki.easecation.net/零雾05_Fogg05";
             NSString *encodedUrlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPathAllowedCharacterSet]];

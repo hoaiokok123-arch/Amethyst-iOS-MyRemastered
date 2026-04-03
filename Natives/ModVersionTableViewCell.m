@@ -1,4 +1,5 @@
 #import "ModVersionTableViewCell.h"
+#import "utils.h"
 
 @interface ModVersionTableViewCell ()
 @property (nonatomic, strong) UILabel *nameLabel;
@@ -85,13 +86,13 @@
         displayFormatter.timeStyle = NSDateFormatterNoStyle;
         self.datePublishedLabel.text = [displayFormatter stringFromDate:date];
     } else {
-        self.datePublishedLabel.text = @"未知日期";
+        self.datePublishedLabel.text = localize(@"mods.version.unknown_date", nil);
     }
 
     if (version.primaryFile) {
         self.fileSizeLabel.text = [NSByteCountFormatter stringFromByteCount:[version.primaryFile[@"size"] longValue] countStyle:NSByteCountFormatterCountStyleFile];
     } else {
-        self.fileSizeLabel.text = @"未知大小";
+        self.fileSizeLabel.text = localize(@"mods.version.unknown_size", nil);
     }
 
     self.gameVersionsLabel.text = [version.gameVersions componentsJoinedByString:@", "];

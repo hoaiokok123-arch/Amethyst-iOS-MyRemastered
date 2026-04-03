@@ -88,7 +88,7 @@ NSString *const AIConfigDidChangeNotification = @"AIConfigDidChangeNotification"
         if (error) {
             *error = [NSError errorWithDomain:@"AIConfigError" 
                                          code:1 
-                                     userInfo:@{NSLocalizedDescriptionKey: @"API Base URL 不能为空"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"API Base URL không được để trống"}];
         }
         return NO;
     }
@@ -97,7 +97,7 @@ NSString *const AIConfigDidChangeNotification = @"AIConfigDidChangeNotification"
         if (error) {
             *error = [NSError errorWithDomain:@"AIConfigError" 
                                          code:2 
-                                     userInfo:@{NSLocalizedDescriptionKey: @"模型名称不能为空"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Tên mô hình không được để trống"}];
         }
         return NO;
     }
@@ -106,7 +106,7 @@ NSString *const AIConfigDidChangeNotification = @"AIConfigDidChangeNotification"
         if (error) {
             *error = [NSError errorWithDomain:@"AIConfigError" 
                                          code:3 
-                                     userInfo:@{NSLocalizedDescriptionKey: @"API Key 不能为空"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"API Key không được để trống"}];
         }
         return NO;
     }
@@ -117,7 +117,7 @@ NSString *const AIConfigDidChangeNotification = @"AIConfigDidChangeNotification"
         if (error) {
             *error = [NSError errorWithDomain:@"AIConfigError" 
                                          code:4 
-                                     userInfo:@{NSLocalizedDescriptionKey: @"API Base URL 格式无效"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Định dạng API Base URL không hợp lệ"}];
         }
         return NO;
     }
@@ -130,7 +130,7 @@ NSString *const AIConfigDidChangeNotification = @"AIConfigDidChangeNotification"
         if (completion) {
             NSError *error = [NSError errorWithDomain:@"AIConfigError" 
                                                  code:5 
-                                             userInfo:@{NSLocalizedDescriptionKey: @"请先完成配置"}];
+                                             userInfo:@{NSLocalizedDescriptionKey: @"Hãy hoàn tất cấu hình trước"}];
             completion(nil, error);
         }
         return;
@@ -158,7 +158,7 @@ NSString *const AIConfigDidChangeNotification = @"AIConfigDidChangeNotification"
                 if (completion) {
                     NSError *parseError = [NSError errorWithDomain:@"AIConfigError" 
                                                              code:6 
-                                                         userInfo:@{NSLocalizedDescriptionKey: @"无法解析模型列表"}];
+                                                         userInfo:@{NSLocalizedDescriptionKey: @"Không thể phân tích danh sách mô hình"}];
                     completion(nil, parseError);
                 }
             });

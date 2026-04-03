@@ -1,5 +1,6 @@
 // VersionCardCell.m
 #import "VersionCardCell.h"
+#import "utils.h"
 
 @implementation VersionCardCell
 
@@ -76,15 +77,15 @@
     self.typeLabel.text = type;
     
     // 根据类型设置颜色
-    if ([type isEqualToString:@"正式版"] || [type isEqualToString:@"release"]) {
+    if ([type isEqualToString:@"Bản phát hành"] || [type isEqualToString:@"release"]) {
         self.typeLabel.backgroundColor = [UIColor systemGreenColor];
-        self.typeLabel.text = @"正式版";
-    } else if ([type isEqualToString:@"测试版"] || [type isEqualToString:@"snapshot"]) {
+        self.typeLabel.text = localize(@"Release", nil);
+    } else if ([type isEqualToString:@"Bản thử nghiệm"] || [type isEqualToString:@"snapshot"]) {
         self.typeLabel.backgroundColor = [UIColor systemOrangeColor];
-        self.typeLabel.text = @"测试版";
+        self.typeLabel.text = localize(@"Snapshot", nil);
     } else {
         self.typeLabel.backgroundColor = [UIColor systemPurpleColor];
-        self.typeLabel.text = @"远古版";
+        self.typeLabel.text = localize(@"Unstable", nil);
     }
 }
 

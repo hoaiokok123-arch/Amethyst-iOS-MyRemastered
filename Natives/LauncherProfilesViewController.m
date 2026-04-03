@@ -24,10 +24,10 @@
 
 // 版本类型
 typedef NS_ENUM(NSInteger, VersionType) {
+    VersionTypeAll,
     VersionTypeRelease,
     VersionTypeSnapshot,
-    VersionTypeOld,
-    VersionTypeAll
+    VersionTypeOld
 };
 
 @interface LauncherProfilesViewController () <UICollectionViewDataSource, UICollectionViewDelegate>
@@ -43,7 +43,7 @@ typedef NS_ENUM(NSInteger, VersionType) {
 
 - (id)init {
     self = [super init];
-    self.title = @"下载";
+    self.title = @"Tải xuống";
     return self;
 }
 
@@ -74,7 +74,7 @@ typedef NS_ENUM(NSInteger, VersionType) {
 
 - (void)setupNavigationBar {
     // 添加按钮
-    UIMenu *createMenu = [UIMenu menuWithTitle:@"新建" image:nil identifier:nil
+    UIMenu *createMenu = [UIMenu menuWithTitle:@"Tạo mới" image:nil identifier:nil
     options:UIMenuOptionsDisplayInline
     children:@[
         [UIAction actionWithTitle:@"Vanilla" image:nil identifier:@"vanilla" handler:^(UIAction *action) {
@@ -86,7 +86,7 @@ typedef NS_ENUM(NSInteger, VersionType) {
         [UIAction actionWithTitle:@"Forge" image:nil identifier:@"forge" handler:^(UIAction *action) {
             [self actionCreateForgeProfile];
         }],
-        [UIAction actionWithTitle:@"整合包" image:nil identifier:@"modpack" handler:^(UIAction *action) {
+        [UIAction actionWithTitle:@"Modpack" image:nil identifier:@"modpack" handler:^(UIAction *action) {
             [self actionCreateModpackProfile];
         }]
     ]];
@@ -96,7 +96,7 @@ typedef NS_ENUM(NSInteger, VersionType) {
 }
 
 - (void)setupFilterSegment {
-    self.filterSegment = [[UISegmentedControl alloc] initWithItems:@[@"全部", @"正式版", @"测试版", @"远古版"]];
+    self.filterSegment = [[UISegmentedControl alloc] initWithItems:@[@"Tất cả", @"Bản phát hành", @"Bản thử nghiệm", @"Bản cũ"]];
     self.filterSegment.translatesAutoresizingMaskIntoConstraints = NO;
     self.filterSegment.selectedSegmentIndex = 0;
     [self.filterSegment addTarget:self action:@selector(filterChanged:) forControlEvents:UIControlEventValueChanged];
@@ -124,12 +124,12 @@ typedef NS_ENUM(NSInteger, VersionType) {
     
     [NSLayoutConstraint activateConstraints:@[
         [self.filterSegment.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:8],
-        [self.filterSegment.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
-        [self.filterSegment.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [self.filterSegment.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.filterSegment.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         
         [self.collectionView.topAnchor constraintEqualToAnchor:self.filterSegment.bottomAnchor constant:8],
-        [self.collectionView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-        [self.collectionView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+        [self.collectionView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [self.collectionView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor],
         [self.collectionView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]
     ]];
 }
@@ -255,16 +255,16 @@ typedef NS_ENUM(NSInteger, VersionType) {
     
     // 显示确认对话框
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:versionId
-                                                                   message:@"选择操作"
+                                                                   message:@"Chọn thao tác"
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"下载此版本"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Tải phiên bản này"
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction * _Nonnull action) {
         [self downloadVersion:version];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil)
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     
@@ -293,18 +293,18 @@ typedef NS_ENUM(NSInteger, VersionType) {
     PLProfiles.current.selectedProfileName = versionId;
     
     // 显示下载进度
-    UIAlertController *progressAlert = [UIAlertController alertControllerWithTitle:@"下载中"
-                                                                           message:[NSString stringWithFormat:@"正在下载 %@...", versionId]
+    UIAlertController *progressAlert = [UIAlertController alertControllerWithTitle:@"Đang tải xuống"
+                                                                           message:[NSString stringWithFormat:@"Đang tải %@...", versionId]
                                                                     preferredStyle:UIAlertControllerStyleAlert];
     [self presentViewController:progressAlert animated:YES completion:nil];
     
     // 模拟下载完成
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [progressAlert dismissViewControllerAnimated:YES completion:^{
-            UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"下载完成"
-                                                                                  message:[NSString stringWithFormat:@"%@ 下载完成", versionId]
+            UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"Tải xong"
+                                                                                  message:[NSString stringWithFormat:@"%@ đã tải xong", versionId]
                                                                            preferredStyle:UIAlertControllerStyleAlert];
-            [successAlert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+            [successAlert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil]];
             [self presentViewController:successAlert animated:YES completion:nil];
         }];
     });
@@ -334,23 +334,23 @@ typedef NS_ENUM(NSInteger, VersionType) {
 
 - (void)showVersionSelectorForType:(NSString *)type {
     // 显示版本选择器
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择版本"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Chọn phiên bản"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"最新正式版"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Bản phát hành mới nhất"
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction * _Nonnull action) {
         [self createProfileWithVersion:@"latest-release" type:type];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"最新测试版"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Bản thử nghiệm mới nhất"
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction * _Nonnull action) {
         [self createProfileWithVersion:@"latest-snapshot" type:type];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil)
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     
@@ -366,10 +366,10 @@ typedef NS_ENUM(NSInteger, VersionType) {
     [PLProfiles.current saveProfile:profile withName:versionId];
     PLProfiles.current.selectedProfileName = versionId;
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"创建成功"
-                                                                   message:[NSString stringWithFormat:@"已创建 %@ 配置", versionId]
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Tạo thành công"
+                                                                   message:[NSString stringWithFormat:@"Đã tạo cấu hình %@.", versionId]
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 

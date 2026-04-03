@@ -195,7 +195,7 @@
 
 - (void)configureWithName:(NSString *)name version:(NSString *)version isSelected:(BOOL)isSelected {
     self.nameLabel.text = name;
-    self.versionLabel.text = version ?: @"未知版本";
+    self.versionLabel.text = version ?: localize(@"version_manager.unknown_version", @"Unknown version");
     self.selectedBadge.hidden = !isSelected;
     
     if (isSelected) {
@@ -248,7 +248,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"版本管理";
+    self.title = localize(@"version_manager.title", @"Version Manager");
     self.view.backgroundColor = [UIColor clearColor];
     [self setupCollectionView];
     [self loadProfiles];
@@ -283,8 +283,8 @@
 
 - (void)setupCollectionView {
     UICollectionViewLayout *layout = [self createLayout];
-    self.collectionView = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
-    self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+    self.collectionView.translatesAutoresizingMaskIntoConstraints = NO;
     self.collectionView.backgroundColor = [UIColor clearColor];
     self.collectionView.dataSource = self;
     self.collectionView.delegate = self;
@@ -295,6 +295,12 @@
     [self.collectionView registerClass:[VMSectionHeaderView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"HeaderView"];
     
     [self.view addSubview:self.collectionView];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.collectionView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+        [self.collectionView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [self.collectionView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [self.collectionView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor]
+    ]];
 }
 
 - (UICollectionViewLayout *)createLayout {
@@ -370,13 +376,22 @@
         
         switch (indexPath.item) {
             case 0:
-                [cell configureWithIcon:@"folder.fill" title:@"游戏目录" subtitle:getPrefObject(@"general.game_directory") color:[UIColor systemBlueColor]];
+                [cell configureWithIcon:@"folder.fill"
+                                   title:localize(@"preference.title.game_directory", nil)
+                                subtitle:getPrefObject(@"general.game_directory")
+                                   color:[UIColor systemBlueColor]];
                 break;
             case 1:
-                [cell configureWithIcon:@"puzzlepiece.extension.fill" title:@"Mod 管理" subtitle:@"管理已安装的 Mod" color:[UIColor systemOrangeColor]];
+                [cell configureWithIcon:@"puzzlepiece.extension.fill"
+                                   title:localize(@"profile.manage_mods", nil)
+                                subtitle:localize(@"version_manager.manage_mods.subtitle", @"Manage installed mods")
+                                   color:[UIColor systemOrangeColor]];
                 break;
             case 2:
-                [cell configureWithIcon:@"paintbrush.fill" title:@"光影管理" subtitle:@"管理光影包" color:[UIColor systemPurpleColor]];
+                [cell configureWithIcon:@"paintbrush.fill"
+                                   title:localize(@"version_manager.manage_shaders", @"Shader Packs")
+                                subtitle:localize(@"version_manager.manage_shaders.subtitle", @"Manage installed shader packs")
+                                   color:[UIColor systemPurpleColor]];
                 break;
         }
         return cell;
@@ -385,7 +400,7 @@
         
         NSString *profileName = self.profileList[indexPath.item];
         NSDictionary *profile = PLProfiles.current.profiles[profileName];
-        NSString *versionId = profile[@"lastVersionId"] ?: @"未知版本";
+        NSString *versionId = profile[@"lastVersionId"] ?: localize(@"version_manager.unknown_version", @"Unknown version");
         BOOL isSelected = [profileName isEqualToString:self.selectedProfile];
         
         [cell configureWithName:profileName version:versionId isSelected:isSelected];
@@ -396,7 +411,7 @@
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
     if (kind == UICollectionElementKindSectionHeader && indexPath.section == 1) {
         VMSectionHeaderView *header = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"HeaderView" forIndexPath:indexPath];
-        header.titleLabel.text = @"版本配置";
+        header.titleLabel.text = localize(@"profile.section.profiles", nil);
         return header;
     }
     return [UICollectionReusableView new];
@@ -429,7 +444,7 @@
 
 - (void)openModsManager {
     if (!self.selectedProfile) {
-        [self showAlert:@"请先选择一个版本"];
+        [self showAlert:localize(@"version_manager.select_profile_first", @"Please select a profile first")];
         return;
     }
     ModsManagerViewController *vc = [[ModsManagerViewController alloc] init];
@@ -442,7 +457,7 @@
 
 - (void)openShadersManager {
     if (!self.selectedProfile) {
-        [self showAlert:@"请先选择一个版本"];
+        [self showAlert:localize(@"version_manager.select_profile_first", @"Please select a profile first")];
         return;
     }
     ShadersManagerViewController *vc = [[ShadersManagerViewController alloc] init];
@@ -462,20 +477,20 @@
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
     if (!isSelected) {
-        [alert addAction:[UIAlertAction actionWithTitle:@"选择此版本" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:localize(@"version_manager.select_profile", @"Select this profile") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             PLProfiles.current.selectedProfileName = profileName;
         }]];
     }
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"编辑配置" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"Edit profile", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [self editProfile:profileName];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"Delete", nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [self deleteProfile:profileName];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil) style:UIAlertActionStyleCancel handler:nil]];
     
     alert.popoverPresentationController.sourceView = self.view;
     alert.popoverPresentationController.sourceRect = CGRectMake(self.view.bounds.size.width / 2, self.view.bounds.size.height / 2, 1, 1);
@@ -493,16 +508,16 @@
 
 - (void)deleteProfile:(NSString *)profileName {
     if (self.profileList.count <= 1) {
-        [self showAlert:@"至少需要保留一个版本配置"];
+        [self showAlert:localize(@"version_manager.min_profile_required", @"At least one profile must be kept")];
         return;
     }
     
-    UIAlertController *confirm = [UIAlertController alertControllerWithTitle:@"确认删除"
-                                                                     message:[NSString stringWithFormat:@"确定要删除 \"%@\" 吗？", profileName]
+    UIAlertController *confirm = [UIAlertController alertControllerWithTitle:localize(@"version_manager.delete_confirm.title", @"Confirm deletion")
+                                                                     message:[NSString stringWithFormat:localize(@"version_manager.delete_confirm.message", @"Delete \"%@\"?"), profileName]
                                                               preferredStyle:UIAlertControllerStyleAlert];
     
-    [confirm addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
-    [confirm addAction:[UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [confirm addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil) style:UIAlertActionStyleCancel handler:nil]];
+    [confirm addAction:[UIAlertAction actionWithTitle:localize(@"Delete", nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [PLProfiles.current.profiles removeObjectForKey:profileName];
         if ([PLProfiles.current.selectedProfileName isEqualToString:profileName]) {
             PLProfiles.current.selectedProfileName = PLProfiles.current.profiles.allKeys.firstObject;
@@ -516,8 +531,8 @@
 }
 
 - (void)showAlert:(NSString *)message {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:message preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Notice", nil) message:message preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 

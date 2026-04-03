@@ -158,7 +158,7 @@
             downloadsStr = [NSString stringWithFormat:@"%ld", (long)dl];
         }
     }
-    self.metaLabel.text = [NSString stringWithFormat:@"%@ • %@ 下载", author, downloadsStr];
+    self.metaLabel.text = [NSString stringWithFormat:@"%@ • %@ tải xuống", author, downloadsStr];
     
     NSString *iconUrl = mod[@"imageUrl"] ?: mod[@"icon_url"];
     if (iconUrl.length > 0) {
@@ -205,7 +205,7 @@
             downloadsStr = [NSString stringWithFormat:@"%ld", (long)dl];
         }
     }
-    self.metaLabel.text = [NSString stringWithFormat:@"%@ • %@ 下载", author, downloadsStr];
+    self.metaLabel.text = [NSString stringWithFormat:@"%@ • %@ tải xuống", author, downloadsStr];
     
     NSString *iconUrl = shader[@"imageUrl"] ?: shader[@"icon_url"];
     if (iconUrl.length > 0) {
@@ -343,7 +343,7 @@
 - (void)setIncompatible:(BOOL)incompatible {
     if (incompatible) {
         self.statusLabel.hidden = NO;
-        self.statusLabel.text = @"不兼容";
+        self.statusLabel.text = @"Không tương thích";
         self.statusLabel.textColor = [UIColor systemRedColor];
         self.nameLabel.textColor = [UIColor tertiaryLabelColor];
         self.descLabel.textColor = [UIColor quaternaryLabelColor];
@@ -406,7 +406,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.title = @"选择安装方式";
+    self.title = @"Chọn cách cài đặt";
     self.view.backgroundColor = [UIColor clearColor];
     self.preferredContentSize = CGSizeMake(540, 620);
     
@@ -437,11 +437,11 @@
     BOOL neoForgeCompatible = [self isNeoForgeCompatible];
     
     self.loaders = @[
-        @{@"id": @"vanilla", @"name": @"原版 (Vanilla)", @"desc": @"纯净 Minecraft，不包含任何模组加载器", @"icon": @"cube.fill", @"color": [UIColor systemGrayColor], @"compatible": @YES},
-        @{@"id": @"fabric", @"name": @"Fabric", @"desc": @"轻量级模组加载器，适合小型模组", @"icon": @"bolt.fill", @"color": [UIColor systemOrangeColor], @"compatible": @(fabricCompatible)},
-        @{@"id": @"forge", @"name": @"Forge", @"desc": @"经典模组加载器，模组生态丰富（支持 1.1+）", @"icon": @"hammer.fill", @"color": [UIColor systemRedColor], @"compatible": @(forgeCompatible)},
-        @{@"id": @"neoforge", @"name": @"NeoForge", @"desc": @"Forge 的分支，支持 1.20.1+", @"icon": @"hammer.fill", @"color": [UIColor systemBrownColor], @"compatible": @(neoForgeCompatible)},
-        @{@"id": @"quilt", @"name": @"Quilt", @"desc": @"基于 Fabric 的新一代加载器", @"icon": @"bolt.fill", @"color": [UIColor systemPurpleColor], @"compatible": @(quiltCompatible)}
+        @{@"id": @"vanilla", @"name": @"Nguyên bản (Vanilla)", @"desc": @"Minecraft thuần, không kèm mod loader", @"icon": @"cube.fill", @"color": [UIColor systemGrayColor], @"compatible": @YES},
+        @{@"id": @"fabric", @"name": @"Fabric", @"desc": @"Mod loader nhẹ, phù hợp mod nhỏ", @"icon": @"bolt.fill", @"color": [UIColor systemOrangeColor], @"compatible": @(fabricCompatible)},
+        @{@"id": @"forge", @"name": @"Forge", @"desc": @"Mod loader cổ điển, hệ sinh thái mod phong phú (hỗ trợ 1.1+)", @"icon": @"hammer.fill", @"color": [UIColor systemRedColor], @"compatible": @(forgeCompatible)},
+        @{@"id": @"neoforge", @"name": @"NeoForge", @"desc": @"Nhánh của Forge, hỗ trợ 1.20.1+", @"icon": @"hammer.fill", @"color": [UIColor systemBrownColor], @"compatible": @(neoForgeCompatible)},
+        @{@"id": @"quilt", @"name": @"Quilt", @"desc": @"Loader thế hệ mới dựa trên Fabric", @"icon": @"bolt.fill", @"color": [UIColor systemPurpleColor], @"compatible": @(quiltCompatible)}
     ];
 }
 
@@ -539,7 +539,7 @@
     
     self.fabricAPILabel = [[UILabel alloc] init];
     self.fabricAPILabel.translatesAutoresizingMaskIntoConstraints = NO;
-    self.fabricAPILabel.text = @"同时安装 Fabric API";
+    self.fabricAPILabel.text = @"Cài kèm Fabric API";
     self.fabricAPILabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     self.fabricAPILabel.textColor = [UIColor labelColor];
     self.fabricAPILabel.hidden = YES;
@@ -553,7 +553,7 @@
     
     self.optiFineLabel = [[UILabel alloc] init];
     self.optiFineLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    self.optiFineLabel.text = @"同时安装 OptiFine";
+    self.optiFineLabel.text = @"Cài kèm OptiFine";
     self.optiFineLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     self.optiFineLabel.textColor = [UIColor labelColor];
     self.optiFineLabel.hidden = YES;
@@ -607,7 +607,7 @@
     
     self.emptyVersionsLabel = [[UILabel alloc] init];
     self.emptyVersionsLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    self.emptyVersionsLabel.text = @"暂无可用版本";
+    self.emptyVersionsLabel.text = @"Chưa có phiên bản khả dụng";
     self.emptyVersionsLabel.textAlignment = NSTextAlignmentCenter;
     self.emptyVersionsLabel.textColor = [UIColor secondaryLabelColor];
     self.emptyVersionsLabel.font = [UIFont systemFontOfSize:14];
@@ -631,7 +631,7 @@
 - (void)setupInstallButton {
     self.installButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.installButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.installButton setTitle:@"安装" forState:UIControlStateNormal];
+    [self.installButton setTitle:@"Cài đặt" forState:UIControlStateNormal];
     self.installButton.titleLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
     self.installButton.backgroundColor = [UIColor systemGreenColor];
     [self.installButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -649,7 +649,7 @@
 
 - (void)installButtonTapped {
     if (!self.selectedLoader) {
-        [self showAlert:@"请选择安装方式" message:nil];
+        [self showAlert:@"Hãy chọn cách cài đặt" message:nil];
         return;
     }
     
@@ -657,7 +657,7 @@
     
     if (needsVersion) {
         if (self.loaderVersions == nil) {
-            [self showAlert:@"正在加载版本列表" message:@"请稍后再试"];
+            [self showAlert:@"Đang tải danh sách phiên bản" message:@"Hãy thử lại sau"];
             return;
         }
         if (self.loaderVersions.count == 0) {
@@ -668,13 +668,13 @@
                     break;
                 }
             }
-            [self showAlert:[NSString stringWithFormat:@"%@ 暂无可用的版本", loaderName]
-                    message:[NSString stringWithFormat:@"当前选择的 Minecraft %@ 没有可用的 %@ 版本", self.gameVersion, loaderName]];
+            [self showAlert:[NSString stringWithFormat:@"%@ hiện chưa có phiên bản khả dụng", loaderName]
+                    message:[NSString stringWithFormat:@"Minecraft %@ hiện không có phiên bản %@ khả dụng", self.gameVersion, loaderName]];
             return;
         }
         
         if (!self.selectedLoaderVersion) {
-            [self showAlert:@"请选择版本" message:nil];
+            [self showAlert:@"Hãy chọn phiên bản" message:nil];
             return;
         }
     }
@@ -689,7 +689,7 @@
 
 - (void)showAlert:(NSString *)title message:(NSString *)message {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 
@@ -1104,7 +1104,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.title = @"下载";
+    self.title = @"Tải xuống";
     self.view.backgroundColor = [UIColor clearColor];
     
     self.modList = [NSMutableArray array];
@@ -1137,7 +1137,7 @@
 }
 
 - (void)setupTabSegment {
-    self.tabSegment = [[UISegmentedControl alloc] initWithItems:@[@"版本下载", @"模组下载", @"光影下载", @"整合包"]];
+    self.tabSegment = [[UISegmentedControl alloc] initWithItems:@[@"Tải phiên bản", @"Tải mod", @"Tải shader", @"Modpack"]];
     self.tabSegment.translatesAutoresizingMaskIntoConstraints = NO;
     self.tabSegment.selectedSegmentIndex = 0;
     [self.tabSegment addTarget:self action:@selector(tabChanged:) forControlEvents:UIControlEventValueChanged];
@@ -1151,7 +1151,7 @@
 }
 
 - (void)setupVersionFilterSegment {
-    self.versionFilterSegment = [[UISegmentedControl alloc] initWithItems:@[@"全部", @"正式版", @"测试版", @"远古版"]];
+    self.versionFilterSegment = [[UISegmentedControl alloc] initWithItems:@[@"Tất cả", @"Bản phát hành", @"Bản thử nghiệm", @"Bản cũ"]];
     self.versionFilterSegment.translatesAutoresizingMaskIntoConstraints = NO;
     self.versionFilterSegment.selectedSegmentIndex = 0;
     [self.versionFilterSegment addTarget:self action:@selector(versionFilterChanged:) forControlEvents:UIControlEventValueChanged];
@@ -1167,7 +1167,7 @@
 - (void)setupSearchBar {
     self.searchBar = [[UISearchBar alloc] init];
     self.searchBar.translatesAutoresizingMaskIntoConstraints = NO;
-    self.searchBar.placeholder = @"搜索...";
+    self.searchBar.placeholder = @"Tìm kiếm...";
     self.searchBar.delegate = self;
     self.searchBar.searchBarStyle = UISearchBarStyleMinimal;
     self.searchBar.hidden = YES;
@@ -1304,7 +1304,7 @@
 - (void)setupEmptyLabel {
     self.emptyLabel = [[UILabel alloc] init];
     self.emptyLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    self.emptyLabel.text = @"暂无内容";
+    self.emptyLabel.text = @"Chưa có nội dung";
     self.emptyLabel.textAlignment = NSTextAlignmentCenter;
     self.emptyLabel.textColor = [UIColor secondaryLabelColor];
     self.emptyLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
@@ -1333,17 +1333,17 @@
     self.modpackTableView.hidden = (index != 3);
     
     if (index == 1) {
-        self.searchBar.placeholder = @"搜索模组...";
+        self.searchBar.placeholder = @"Tìm mod...";
         if (self.modList.count == 0) {
             [self loadModList];
         }
     } else if (index == 2) {
-        self.searchBar.placeholder = @"搜索光影...";
+        self.searchBar.placeholder = @"Tìm shader...";
         if (self.shaderList.count == 0) {
             [self loadShaderList];
         }
     } else if (index == 3) {
-        self.searchBar.placeholder = @"搜索整合包...";
+        self.searchBar.placeholder = @"Tìm modpack...";
         if (self.modpackList.count == 0) {
             [self loadModpackList];
         }
@@ -1379,11 +1379,11 @@
                     strongSelf.versionList = json[@"versions"];
                     [strongSelf applyVersionFilter];
                 } else {
-                    strongSelf.emptyLabel.text = @"加载版本列表失败";
+                    strongSelf.emptyLabel.text = @"Tải danh sách phiên bản thất bại";
                     strongSelf.emptyLabel.hidden = NO;
                 }
             } else {
-                strongSelf.emptyLabel.text = @"网络错误，无法加载版本";
+                strongSelf.emptyLabel.text = @"Lỗi mạng, không thể tải phiên bản";
                 strongSelf.emptyLabel.hidden = NO;
             }
         });
@@ -1420,7 +1420,7 @@
     
     self.emptyLabel.hidden = (self.filteredVersions.count > 0);
     if (self.filteredVersions.count == 0) {
-        self.emptyLabel.text = @"暂无版本";
+        self.emptyLabel.text = @"Chưa có phiên bản nào";
         self.emptyLabel.hidden = NO;
     } else {
         self.emptyLabel.hidden = YES;
@@ -1481,7 +1481,7 @@
                 [strongSelf.modTableView reloadData];
                 strongSelf.emptyLabel.hidden = (strongSelf.modList.count > 0);
                 if (strongSelf.modList.count == 0) {
-                    strongSelf.emptyLabel.text = @"暂无模组";
+                    strongSelf.emptyLabel.text = @"Chưa có mod nào";
                     strongSelf.emptyLabel.hidden = NO;
                 }
             } else if (error) {
@@ -1548,7 +1548,7 @@
                 [strongSelf.shaderTableView reloadData];
                 strongSelf.emptyLabel.hidden = (strongSelf.shaderList.count > 0);
                 if (strongSelf.shaderList.count == 0) {
-                    strongSelf.emptyLabel.text = @"暂无光影";
+                    strongSelf.emptyLabel.text = @"Chưa có shader nào";
                     strongSelf.emptyLabel.hidden = NO;
                 }
             } else if (error) {
@@ -1615,7 +1615,7 @@
                 [strongSelf.modpackTableView reloadData];
                 strongSelf.emptyLabel.hidden = (strongSelf.modpackList.count > 0);
                 if (strongSelf.modpackList.count == 0) {
-                    strongSelf.emptyLabel.text = @"暂无整合包";
+                    strongSelf.emptyLabel.text = @"Chưa có modpack nào";
                     strongSelf.emptyLabel.hidden = NO;
                 }
             } else if (error) {
@@ -1639,48 +1639,48 @@
 - (void)showFilterOptions {
     NSInteger tabIndex = self.tabSegment.selectedSegmentIndex;
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选项"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Tùy chọn"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
     if (tabIndex == 1 || tabIndex == 2) {
-        [alert addAction:[UIAlertAction actionWithTitle:@"选择游戏版本"
+        [alert addAction:[UIAlertAction actionWithTitle:@"Chọn phiên bản game"
                                                   style:UIAlertActionStyleDefault
                                                 handler:^(UIAlertAction * _Nonnull action) {
             [self showGameVersionPicker];
         }]];
         
-        [alert addAction:[UIAlertAction actionWithTitle:@"排序方式"
+        [alert addAction:[UIAlertAction actionWithTitle:@"Sắp xếp theo"
                                                   style:UIAlertActionStyleDefault
                                                 handler:^(UIAlertAction * _Nonnull action) {
             [self showSortOptions];
         }]];
         
         if (tabIndex == 1) {
-            [alert addAction:[UIAlertAction actionWithTitle:@"模组加载器"
+            [alert addAction:[UIAlertAction actionWithTitle:@"Mod loader"
                                                       style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * _Nonnull action) {
                 [self showModLoaderPicker];
             }]];
         }
         
-        [alert addAction:[UIAlertAction actionWithTitle:@"重置筛选"
+        [alert addAction:[UIAlertAction actionWithTitle:@"Đặt lại bộ lọc"
                                                   style:UIAlertActionStyleDestructive
                                                 handler:^(UIAlertAction * _Nonnull action) {
             [self resetFilters];
         }]];
     } else if (tabIndex == 3) {
-        [alert addAction:[UIAlertAction actionWithTitle:@"导入本地整合包"
+        [alert addAction:[UIAlertAction actionWithTitle:@"Nhập modpack cục bộ"
                                                   style:UIAlertActionStyleDefault
                                                 handler:^(UIAlertAction * _Nonnull action) {
             [self openImportModpackView];
         }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"选择游戏版本"
+        [alert addAction:[UIAlertAction actionWithTitle:@"Chọn phiên bản game"
                                                   style:UIAlertActionStyleDefault
                                                 handler:^(UIAlertAction * _Nonnull action) {
             [self showGameVersionPicker];
         }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"重置筛选"
+        [alert addAction:[UIAlertAction actionWithTitle:@"Đặt lại bộ lọc"
                                                   style:UIAlertActionStyleDestructive
                                                 handler:^(UIAlertAction * _Nonnull action) {
             self.currentGameVersion = nil;
@@ -1688,7 +1688,7 @@
         }]];
     }
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Hủy"
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     
@@ -1701,17 +1701,17 @@
 }
 
 - (void)showGameVersionPicker {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择游戏版本"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Chọn phiên bản game"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
-    NSArray *versions = @[@"全部版本", @"1.21", @"1.20.4", @"1.20.1", @"1.19.4", @"1.19.2", @"1.18.2", @"1.16.5", @"1.12.2", @"1.8.9"];
+    NSArray *versions = @[@"Tất cả phiên bản", @"1.21", @"1.20.4", @"1.20.1", @"1.19.4", @"1.19.2", @"1.18.2", @"1.16.5", @"1.12.2", @"1.8.9"];
     
     for (NSString *version in versions) {
         [alert addAction:[UIAlertAction actionWithTitle:version
                                                   style:UIAlertActionStyleDefault
                                                 handler:^(UIAlertAction * _Nonnull action) {
-            if ([version isEqualToString:@"全部版本"]) {
+            if ([version isEqualToString:@"Tất cả phiên bản"]) {
                 self.currentGameVersion = nil;
             } else {
                 self.currentGameVersion = version;
@@ -1720,7 +1720,7 @@
         }]];
     }
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Hủy"
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     
@@ -1733,16 +1733,16 @@
 }
 
 - (void)showSortOptions {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"排序方式"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Sắp xếp theo"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
     NSDictionary *sortOptions = @{
-        @"关注度": @"follows",
-        @"下载数": @"downloads",
-        @"最近更新": @"updated",
-        @"最新发布": @"newest",
-        @"相关性": @"relevance"
+        @"Độ phổ biến": @"follows",
+        @"Lượt tải": @"downloads",
+        @"Cập nhật gần đây": @"updated",
+        @"Phát hành mới nhất": @"newest",
+        @"Liên quan": @"relevance"
     };
     
     for (NSString *title in sortOptions) {
@@ -1754,7 +1754,7 @@
         }]];
     }
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Hủy"
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     
@@ -1767,11 +1767,11 @@
 }
 
 - (void)showModLoaderPicker {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"模组加载器"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Mod loader"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
-    NSArray *loaderNames = @[@"全部", @"Fabric", @"Forge", @"Quilt", @"NeoForge"];
+    NSArray *loaderNames = @[@"Tất cả", @"Fabric", @"Forge", @"Quilt", @"NeoForge"];
     NSArray *loaderValues = @[[NSNull null], @"fabric", @"forge", @"quilt", @"neoforge"];
     
     for (NSInteger i = 0; i < loaderNames.count; i++) {
@@ -1786,7 +1786,7 @@
         }]];
     }
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Hủy"
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     
@@ -1825,10 +1825,10 @@
 }
 
 - (void)showError:(NSString *)message {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"错误"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Lỗi"
                                                                    message:message
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 
@@ -1928,9 +1928,9 @@
     } else if ([loaderType isEqualToString:@"neoforge"]) {
         [self installNeoForge:versionId];
     } else if ([loaderType isEqualToString:@"quilt"]) {
-        [self showError:@"Quilt 安装器暂未实现"];
+        [self showError:@"Trình cài Quilt chưa được hỗ trợ"];
     } else {
-        [self showError:[NSString stringWithFormat:@"%@ 安装器暂未实现", loaderType]];
+        [self showError:[NSString stringWithFormat:@"Trình cài %@ chưa được hỗ trợ", loaderType]];
     }
 }
 
@@ -1938,7 +1938,7 @@
 
 - (void)downloadVanillaVersion:(NSDictionary *)version {
     if (![self isNetworkAvailable]) {
-        [self showError:@"网络不可用，请检查网络连接"];
+        [self showError:@"Mạng không khả dụng, hãy kiểm tra kết nối"];
         return;
     }
     
@@ -1959,11 +1959,11 @@
 - (void)startVersionDownload:(NSDictionary *)version {
     __weak DownloadViewController *weakSelf = self;
     
-    self.downloadingAlert = [UIAlertController alertControllerWithTitle:@"下载中"
-                                                                message:@"正在准备下载..."
+    self.downloadingAlert = [UIAlertController alertControllerWithTitle:@"Đang tải xuống"
+                                                                message:@"Đang chuẩn bị tải xuống..."
                                                          preferredStyle:UIAlertControllerStyleAlert];
     
-    UIAlertAction *detailsAction = [UIAlertAction actionWithTitle:@"查看详情"
+    UIAlertAction *detailsAction = [UIAlertAction actionWithTitle:@"Xem chi tiết"
                                                             style:UIAlertActionStyleDefault
                                                           handler:^(UIAlertAction * _Nonnull action) {
         if (weakSelf.downloadTask) {
@@ -1975,7 +1975,7 @@
     }];
     [self.downloadingAlert addAction:detailsAction];
     
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消"
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Hủy"
                                                            style:UIAlertActionStyleDestructive
                                                          handler:^(UIAlertAction * _Nonnull action) {
         if (weakSelf.downloadTask) {
@@ -2002,7 +2002,7 @@
     self.downloadTask.retryCallback = ^(NSInteger retryCount, NSInteger maxRetryCount) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (weakSelf.downloadingAlert) {
-                weakSelf.downloadingAlert.message = [NSString stringWithFormat:@"下载失败，正在重试 (%ld/%ld)...", (long)retryCount, (long)maxRetryCount];
+                weakSelf.downloadingAlert.message = [NSString stringWithFormat:@"Tải xuống thất bại, đang thử lại (%ld/%ld)...", (long)retryCount, (long)maxRetryCount];
             }
         });
     };
@@ -2019,7 +2019,7 @@
             weakSelf.progressVC = nil;
             weakSelf.downloadingAlert = nil;
             
-            [weakSelf showError:@"版本下载失败，请检查网络连接"];
+            [weakSelf showError:@"Tải phiên bản thất bại, hãy kiểm tra kết nối mạng"];
         });
     };
     
@@ -2043,8 +2043,8 @@
 #pragma mark - Fabric Installation
 
 - (void)installFabric:(NSString *)gameVersion loaderVersion:(NSString *)loaderVersion installAPI:(BOOL)installAPI {
-    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:@"正在安装 Fabric"
-                                                                              message:[NSString stringWithFormat:@"游戏版本: %@\n加载器版本: %@", gameVersion, loaderVersion]
+    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:@"Đang cài Fabric"
+                                                                              message:[NSString stringWithFormat:@"Phiên bản game: %@\nPhiên bản loader: %@", gameVersion, loaderVersion]
                                                                        preferredStyle:UIAlertControllerStyleAlert];
     
     UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
@@ -2068,7 +2068,7 @@
             if (!strongSelf) return;
             if (!data || error) {
                 [downloadingAlert dismissViewControllerAnimated:YES completion:^{
-                    [strongSelf showError:[NSString stringWithFormat:@"Fabric 安装失败: %@", error.localizedDescription ?: @"网络错误"]];
+                    [strongSelf showError:[NSString stringWithFormat:@"Cài Fabric thất bại: %@", error.localizedDescription ?: @"Lỗi mạng"]];
                 }];
                 return;
             }
@@ -2078,7 +2078,7 @@
             
             if (!profileJson || jsonError) {
                 [downloadingAlert dismissViewControllerAnimated:YES completion:^{
-                    [strongSelf showError:@"解析 Fabric 配置失败"];
+                    [strongSelf showError:@"Phân tích cấu hình Fabric thất bại"];
                 }];
                 return;
             }
@@ -2097,7 +2097,7 @@
             
             if (saveError) {
                 [downloadingAlert dismissViewControllerAnimated:YES completion:^{
-                    [strongSelf showError:[NSString stringWithFormat:@"保存配置失败: %@", saveError.localizedDescription]];
+                    [strongSelf showError:[NSString stringWithFormat:@"Lưu cấu hình thất bại: %@", saveError.localizedDescription]];
                 }];
                 return;
             }
@@ -2116,16 +2116,16 @@
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [downloadingAlert dismissViewControllerAnimated:YES completion:^{
                             if (success) {
-                                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Fabric %@ 安装成功\nFabric API 已自动安装", loaderVersion]];
+                                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Fabric %@ đã được cài thành công\nFabric API đã được cài tự động", loaderVersion]];
                             } else {
-                                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Fabric %@ 安装成功\nFabric API 安装失败: %@", loaderVersion, apiError.localizedDescription]];
+                                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Fabric %@ đã được cài thành công\nFabric API cài thất bại: %@", loaderVersion, apiError.localizedDescription]];
                             }
                         }];
                     });
                 }];
             } else {
                 [downloadingAlert dismissViewControllerAnimated:YES completion:^{
-                    [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Fabric %@ 安装成功", loaderVersion]];
+                    [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Fabric %@ đã được cài thành công", loaderVersion]];
                 }];
             }
         });
@@ -2146,7 +2146,7 @@
             return;
         }
         if (error || results.count == 0) {
-            if (completion) completion(NO, error ?: [NSError errorWithDomain:@"DownloadError" code:1 userInfo:@{NSLocalizedDescriptionKey: @"未找到 Fabric API"}]);
+            if (completion) completion(NO, error ?: [NSError errorWithDomain:@"DownloadError" code:1 userInfo:@{NSLocalizedDescriptionKey: @"Không tìm thấy Fabric API"}]);
             return;
         }
         
@@ -2160,13 +2160,13 @@
         }
         
         if (!fabricAPI) {
-            if (completion) completion(NO, [NSError errorWithDomain:@"DownloadError" code:2 userInfo:@{NSLocalizedDescriptionKey: @"未找到合适的 Fabric API 版本"}]);
+            if (completion) completion(NO, [NSError errorWithDomain:@"DownloadError" code:2 userInfo:@{NSLocalizedDescriptionKey: @"Không tìm thấy phiên bản Fabric API phù hợp"}]);
             return;
         }
         
         [[ModrinthAPI sharedInstance] getVersionsForModWithID:fabricAPI[@"id"] completion:^(NSArray<ModVersion *> *versions, NSError *versionError) {
             if (versionError || versions.count == 0) {
-                if (completion) completion(NO, versionError ?: [NSError errorWithDomain:@"DownloadError" code:3 userInfo:@{NSLocalizedDescriptionKey: @"获取 Fabric API 版本失败"}]);
+                if (completion) completion(NO, versionError ?: [NSError errorWithDomain:@"DownloadError" code:3 userInfo:@{NSLocalizedDescriptionKey: @"Lấy phiên bản Fabric API thất bại"}]);
                 return;
             }
             
@@ -2200,8 +2200,8 @@
         
         if (success) {
             NSString *filePath = (NSString *)resultOrError;
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"下载完成"
-                                                                            message:@"即将运行安装器..."
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Tải xong"
+                                                                            message:@"Sắp chạy trình cài..."
                                                                      preferredStyle:UIAlertControllerStyleAlert];
             [strongSelf presentViewController:alert animated:YES completion:nil];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -2221,19 +2221,19 @@
                     [strongSelf downloadOptiFine:gameVersion completion:^(BOOL optiSuccess, NSError *optiError) {
                         dispatch_async(dispatch_get_main_queue(), ^{
                             if (optiSuccess) {
-                                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Forge 安装成功\nOptiFine 已自动安装\n配置文件: %@", profileName]];
+                                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Forge đã được cài thành công\nOptiFine đã được cài tự động\nHồ sơ: %@", profileName]];
                             } else {
-                                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Forge 安装成功\nOptiFine 安装失败: %@\n配置文件: %@", optiError.localizedDescription, profileName]];
+                                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Forge đã được cài thành công\nOptiFine cài thất bại: %@\nHồ sơ: %@", optiError.localizedDescription, profileName]];
                             }
                         });
                     }];
                 } else {
-                    [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Forge 安装成功\n配置文件: %@", profileName]];
+                    [strongSelf showSuccessMessage:[NSString stringWithFormat:@"Forge đã được cài thành công\nHồ sơ: %@", profileName]];
                 }
             });
         } else {
             NSError *error = (NSError *)resultOrError;
-            [strongSelf showError:error.localizedDescription ?: @"Forge 安装失败"];
+            [strongSelf showError:error.localizedDescription ?: @"Cài Forge thất bại"];
         }
     };
     forgeVC.completionHandler = completion;
@@ -2248,7 +2248,7 @@
         NSString *optiFineVersion = [self mapGameVersionToOptiFine:gameVersion];
         if (!optiFineVersion) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                if (completion) completion(NO, [NSError errorWithDomain:@"DownloadError" code:1 userInfo:@{NSLocalizedDescriptionKey: @"不支持的 OptiFine 版本"}]);
+                if (completion) completion(NO, [NSError errorWithDomain:@"DownloadError" code:1 userInfo:@{NSLocalizedDescriptionKey: @"Phiên bản OptiFine không được hỗ trợ"}]);
             });
             return;
         }
@@ -2262,7 +2262,7 @@
         
         if (!data || downloadError) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                if (completion) completion(NO, downloadError ?: [NSError errorWithDomain:@"DownloadError" code:2 userInfo:@{NSLocalizedDescriptionKey: @"下载 OptiFine 失败"}]);
+                if (completion) completion(NO, downloadError ?: [NSError errorWithDomain:@"DownloadError" code:2 userInfo:@{NSLocalizedDescriptionKey: @"Tải OptiFine thất bại"}]);
             });
             return;
         }
@@ -2329,8 +2329,8 @@
         
         if (success) {
             NSString *filePath = (NSString *)resultOrError;
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"下载完成"
-                                                                            message:@"即将运行安装器..."
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Tải xong"
+                                                                            message:@"Sắp chạy trình cài..."
                                                                      preferredStyle:UIAlertControllerStyleAlert];
             [strongSelf presentViewController:alert animated:YES completion:nil];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -2345,11 +2345,11 @@
                         }
                     }
                 }
-                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"NeoForge 安装成功\n配置文件: %@", profileName]];
+                [strongSelf showSuccessMessage:[NSString stringWithFormat:@"NeoForge đã được cài thành công\nHồ sơ: %@", profileName]];
             });
         } else {
             NSError *error = (NSError *)resultOrError;
-            [strongSelf showError:error.localizedDescription ?: @"NeoForge 安装失败"];
+            [strongSelf showError:error.localizedDescription ?: @"Cài NeoForge thất bại"];
         }
     };
     neoForgeVC.completionHandler = completion;
@@ -2360,8 +2360,8 @@
 }
 
 - (void)showSuccessMessage:(NSString *)message {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"安装成功" message:message preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cài đặt thành công" message:message preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 
@@ -2372,7 +2372,7 @@
     NSString *filename = version.primaryFile[@"filename"];
     
     if (!downloadURL || downloadURL.length == 0) {
-        if (completion) completion(NO, [NSError errorWithDomain:@"DownloadError" code:4 userInfo:@{NSLocalizedDescriptionKey: @"无效的下载链接"}]);
+        if (completion) completion(NO, [NSError errorWithDomain:@"DownloadError" code:4 userInfo:@{NSLocalizedDescriptionKey: @"Liên kết tải xuống không hợp lệ"}]);
         return;
     }
     
@@ -2415,7 +2415,7 @@
     [[ModrinthAPI sharedInstance] getVersionsForModWithID:modpack[@"id"] completion:^(NSArray<ModVersion *> * _Nullable versions, NSError * _Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (error || versions.count == 0) {
-                [self showError:@"获取整合包版本失败"];
+                [self showError:@"Lấy phiên bản modpack thất bại"];
                 return;
             }
             [self showModpackVersionSelection:versions modpack:modpack];
@@ -2424,7 +2424,7 @@
 }
 
 - (void)showModpackVersionSelection:(NSArray<ModVersion *> *)versions modpack:(NSDictionary *)modpack {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择整合包版本" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Chọn phiên bản modpack" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     for (ModVersion *ver in versions) {
         NSString *title = ver.name;
         if (ver.gameVersions.count > 0) {
@@ -2434,7 +2434,7 @@
             [self startModpackInstallation:ver modpack:modpack];
         }]];
     }
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Hủy" style:UIAlertActionStyleCancel handler:nil]];
     if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
         alert.popoverPresentationController.sourceView = self.view;
         alert.popoverPresentationController.sourceRect = CGRectMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds), 0, 0);
@@ -2445,11 +2445,11 @@
 - (void)startModpackInstallation:(ModVersion *)version modpack:(NSDictionary *)modpack {
     NSString *downloadURL = version.primaryFile[@"url"];
     if (!downloadURL) {
-        [self showError:@"无效的下载链接"];
+        [self showError:@"Liên kết tải xuống không hợp lệ"];
         return;
     }
     
-    UIAlertController *progressAlert = [UIAlertController alertControllerWithTitle:@"正在下载整合包" message:@"0%" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *progressAlert = [UIAlertController alertControllerWithTitle:@"Đang tải modpack" message:@"0%" preferredStyle:UIAlertControllerStyleAlert];
     [self presentViewController:progressAlert animated:YES completion:nil];
     
     NSURLSessionDownloadTask *task = [[NSURLSession sharedSession] downloadTaskWithURL:[NSURL URLWithString:downloadURL] completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
@@ -2484,7 +2484,7 @@
     downloader.modpackDownloadCompletion = ^{
         dispatch_async(dispatch_get_main_queue(), ^{
             [weakSelf.progressVC dismissViewControllerAnimated:YES completion:nil];
-            [weakSelf showSuccessMessage:[NSString stringWithFormat:@"整合包 %@ 安装完成", modpack[@"title"]]];
+            [weakSelf showSuccessMessage:[NSString stringWithFormat:@"Modpack %@ đã được cài xong", modpack[@"title"]]];
         });
     };
 }
@@ -2505,7 +2505,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (tableView == self.modTableView && indexPath.row == self.modList.count && self.hasMoreMods) {
         UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"LoadingCell"];
-        cell.textLabel.text = @"加载更多...";
+        cell.textLabel.text = @"Tải thêm...";
         cell.textLabel.textAlignment = NSTextAlignmentCenter;
         cell.textLabel.textColor = [UIColor secondaryLabelColor];
         cell.backgroundColor = [UIColor clearColor];
@@ -2514,7 +2514,7 @@
     
     if (tableView == self.shaderTableView && indexPath.row == self.shaderList.count && self.hasMoreShaders) {
         UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"LoadingCell"];
-        cell.textLabel.text = @"加载更多...";
+        cell.textLabel.text = @"Tải thêm...";
         cell.textLabel.textAlignment = NSTextAlignmentCenter;
         cell.textLabel.textColor = [UIColor secondaryLabelColor];
         cell.backgroundColor = [UIColor clearColor];
@@ -2523,7 +2523,7 @@
     
     if (tableView == self.modpackTableView && indexPath.row == self.modpackList.count && self.hasMoreModpacks) {
         UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"LoadingCell"];
-        cell.textLabel.text = @"加载更多...";
+        cell.textLabel.text = @"Tải thêm...";
         cell.textLabel.textAlignment = NSTextAlignmentCenter;
         cell.textLabel.textColor = [UIColor secondaryLabelColor];
         cell.backgroundColor = [UIColor clearColor];
@@ -2640,7 +2640,7 @@
     
     NSDictionary *primaryFile = version.primaryFile;
     if (!primaryFile || ![primaryFile[@"url"] isKindOfClass:[NSString class]]) {
-        [self showError:@"未找到有效的下载链接"];
+        [self showError:@"Không tìm thấy liên kết tải xuống hợp lệ"];
         return;
     }
     
@@ -2653,7 +2653,7 @@
 }
 
 - (void)startDownloadForModItem:(ModItem *)item {
-    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:@"正在下载"
+    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:@"Đang tải xuống"
                                                                               message:item.displayName
                                                                        preferredStyle:UIAlertControllerStyleAlert];
     
@@ -2679,10 +2679,10 @@
                 if (error) {
                     [strongSelf showError:error.localizedDescription];
                 } else {
-                    UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"下载成功"
-                                                                                          message:[NSString stringWithFormat:@"%@ 已安装", item.displayName]
+                    UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"Tải thành công"
+                                                                                          message:[NSString stringWithFormat:@"%@ đã được cài", item.displayName]
                                                                                    preferredStyle:UIAlertControllerStyleAlert];
-                    [successAlert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:nil]];
+                    [successAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
                     [strongSelf presentViewController:successAlert animated:YES completion:nil];
                 }
             }];
@@ -2697,7 +2697,7 @@
     
     NSDictionary *primaryFile = version.primaryFile;
     if (!primaryFile || ![primaryFile[@"url"] isKindOfClass:[NSString class]]) {
-        [self showError:@"未找到有效的下载链接"];
+        [self showError:@"Không tìm thấy liên kết tải xuống hợp lệ"];
         return;
     }
     
@@ -2710,7 +2710,7 @@
 }
 
 - (void)startDownloadForShaderItem:(ShaderItem *)item {
-    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:@"正在下载"
+    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:@"Đang tải xuống"
                                                                               message:item.displayName
                                                                        preferredStyle:UIAlertControllerStyleAlert];
     
@@ -2736,10 +2736,10 @@
                 if (error) {
                     [strongSelf showError:error.localizedDescription];
                 } else {
-                    UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"下载成功"
-                                                                                          message:[NSString stringWithFormat:@"%@ 已安装", item.displayName]
+                    UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"Tải thành công"
+                                                                                          message:[NSString stringWithFormat:@"%@ đã được cài", item.displayName]
                                                                                    preferredStyle:UIAlertControllerStyleAlert];
-                    [successAlert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:nil]];
+                    [successAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
                     [strongSelf presentViewController:successAlert animated:YES completion:nil];
                 }
             }];
@@ -2825,15 +2825,15 @@
             if (textProgress.estimatedTimeRemaining) {
                 NSInteger eta = [textProgress.estimatedTimeRemaining integerValue];
                 if (eta > 3600) {
-                    etaText = [NSString stringWithFormat:@" • 剩余 %ld小时%ld分", (long)(eta / 3600), (long)((eta % 3600) / 60)];
+                    etaText = [NSString stringWithFormat:@" • còn %ld giờ %ld phút", (long)(eta / 3600), (long)((eta % 3600) / 60)];
                 } else if (eta > 60) {
-                    etaText = [NSString stringWithFormat:@" • 剩余 %ld分%ld秒", (long)(eta / 60), (long)(eta % 60)];
+                    etaText = [NSString stringWithFormat:@" • còn %ld phút %ld giây", (long)(eta / 60), (long)(eta % 60)];
                 } else if (eta > 0) {
-                    etaText = [NSString stringWithFormat:@" • 剩余 %ld秒", (long)eta];
+                    etaText = [NSString stringWithFormat:@" • còn %ld giây", (long)eta];
                 }
             }
             
-            self.downloadingAlert.message = [NSString stringWithFormat:@"正在下载...\n%@%@%@", progressText, speedText, etaText];
+            self.downloadingAlert.message = [NSString stringWithFormat:@"Đang tải xuống...\n%@%@%@", progressText, speedText, etaText];
         }
         
         if (progress.finished) {
@@ -2859,10 +2859,10 @@
                 self.progressVC = nil;
             }
             
-            UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"下载完成"
-                                                                                  message:[NSString stringWithFormat:@"%@ 下载完成", self.downloadTask.metadata[@"id"] ?: @"版本"]
+            UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"Tải xong"
+                                                                                  message:[NSString stringWithFormat:@"%@ đã tải xong", self.downloadTask.metadata[@"id"] ?: @"Phiên bản"]
                                                                            preferredStyle:UIAlertControllerStyleAlert];
-            [successAlert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+            [successAlert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
             [self presentViewController:successAlert animated:YES completion:nil];
             
             self.downloadTask = nil;

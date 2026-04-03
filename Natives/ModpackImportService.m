@@ -56,7 +56,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
         if (error) {
             *error = [NSError errorWithDomain:@"ModpackImportError"
                                          code:1001
-                                     userInfo:@{NSLocalizedDescriptionKey: @"文件不存在"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Tệp không tồn tại"}];
         }
         return nil;
     }
@@ -68,7 +68,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
         if (error) {
             *error = [NSError errorWithDomain:@"ModpackImportError"
                                          code:1002
-                                     userInfo:@{NSLocalizedDescriptionKey: @"无法打开压缩文件"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Không thể mở tệp nén"}];
         }
         return nil;
     }
@@ -89,7 +89,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
     if (error) {
         *error = [NSError errorWithDomain:@"ModpackImportError"
                                      code:1003
-                                 userInfo:@{NSLocalizedDescriptionKey: @"无效的整合包格式。缺少 modrinth.index.json 或 manifest.json"}];
+                                 userInfo:@{NSLocalizedDescriptionKey: @"Định dạng modpack không hợp lệ. Thiếu modrinth.index.json hoặc manifest.json"}];
     }
     return nil;
 }
@@ -102,7 +102,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
         if (error) {
             *error = [NSError errorWithDomain:@"ModpackImportError"
                                          code:1004
-                                     userInfo:@{NSLocalizedDescriptionKey: @"无法解析 modrinth.index.json"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Không thể phân tích modrinth.index.json"}];
         }
         return nil;
     }
@@ -128,7 +128,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
     }
     
     // Get version info
-    NSString *name = indexDict[@"name"] ?: @"未知整合包";
+    NSString *name = indexDict[@"name"] ?: @"Modpack không rõ";
     NSString *version = indexDict[@"versionId"] ?: @"1.0.0";
     NSString *modpackId = [NSString stringWithFormat:@"modpack_%@", [[NSUUID UUID] UUIDString]];
     
@@ -154,7 +154,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
         if (error) {
             *error = [NSError errorWithDomain:@"ModpackImportError"
                                          code:1005
-                                     userInfo:@{NSLocalizedDescriptionKey: @"无法解析 manifest.json"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Không thể phân tích manifest.json"}];
         }
         return nil;
     }
@@ -184,7 +184,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
         }
     }
     
-    NSString *name = manifestDict[@"name"] ?: @"未知整合包";
+    NSString *name = manifestDict[@"name"] ?: @"Modpack không rõ";
     NSString *version = manifestDict[@"version"] ?: @"1.0.0";
     NSString *modpackId = [NSString stringWithFormat:@"modpack_%@", [[NSUUID UUID] UUIDString]];
     
@@ -212,7 +212,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
         if (error) {
             *error = [NSError errorWithDomain:@"ModpackImportError"
                                          code:2001
-                                     userInfo:@{NSLocalizedDescriptionKey: @"整合包文件不存在"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Tệp modpack không tồn tại"}];
         }
         return NO;
     }
@@ -281,7 +281,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
         if (error) {
             *error = [NSError errorWithDomain:@"ModpackImportError"
                                          code:3001
-                                     userInfo:@{NSLocalizedDescriptionKey: @"无法打开整合包压缩文件"}];
+                                     userInfo:@{NSLocalizedDescriptionKey: @"Không thể mở tệp nén modpack"}];
         }
         return NO;
     }
@@ -293,7 +293,7 @@ static NSString * const kModpacksDirectory = @"modpacks";
         if (error) {
             *error = [NSError errorWithDomain:@"ModpackImportError"
                                          code:3002
-                                     userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"无法解压整合包: %@", archiveError.localizedDescription]}];
+                                     userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Không thể giải nén modpack: %@", archiveError.localizedDescription]}];
         }
         return NO;
     }

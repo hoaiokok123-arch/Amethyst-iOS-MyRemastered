@@ -238,7 +238,7 @@
                         if (completion) {
                             NSError *error = [NSError errorWithDomain:@"ShaderServiceError" 
                                                                  code:1 
-                                                             userInfo:@{NSLocalizedDescriptionKey: @"æ æ³åå»ºåå½±æä»¶å¤¹ï¼è¯·æ£æ¥å­å¨æé"}];
+                                                             userInfo:@{NSLocalizedDescriptionKey: @"Không thể tạo thư mục shader. Hãy kiểm tra quyền lưu trữ."}];
                             completion(error);
                         }
                     });

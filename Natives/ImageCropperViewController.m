@@ -20,7 +20,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.title = @"裁剪图片";
+    self.title = @"Cắt ảnh";
     self.view.backgroundColor = [UIColor blackColor];
     
     // 添加导航栏按钮

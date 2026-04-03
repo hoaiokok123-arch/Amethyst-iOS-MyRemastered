@@ -28,7 +28,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"管理光影";
+    self.title = localize(@"shaders.title", @"Shaders");
     self.view.backgroundColor = [UIColor systemBackgroundColor];
     self.currentMode = self.initialMode; // Use initialMode if set
     self.localShaders = [NSMutableArray array];
@@ -42,7 +42,10 @@
 }
 
 - (void)setupUI {
-    self.modeSwitcher = [[UISegmentedControl alloc] initWithItems:@[@"本地光影", @"在线搜索 (Modrinth)"]];
+    self.modeSwitcher = [[UISegmentedControl alloc] initWithItems:@[
+        localize(@"shaders.mode.local", @"Local Shaders"),
+        localize(@"shaders.mode.online", @"Online Search (Modrinth)")
+    ]];
     self.modeSwitcher.translatesAutoresizingMaskIntoConstraints = NO;
     self.modeSwitcher.selectedSegmentIndex = self.currentMode; // Set based on initial mode
     [self.modeSwitcher addTarget:self action:@selector(modeChanged:) forControlEvents:UIControlEventValueChanged];
@@ -51,7 +54,7 @@
     self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectZero];
     self.searchBar.translatesAutoresizingMaskIntoConstraints = NO;
     self.searchBar.delegate = self;
-    self.searchBar.placeholder = @"搜索本地光影...";
+    self.searchBar.placeholder = localize(@"shaders.search.local.placeholder", @"Search local shaders...");
     [self.view addSubview:self.searchBar];
 
     self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
@@ -116,12 +119,12 @@
 
 - (void)updateUIForCurrentMode {
     if (self.currentMode == ShadersManagerModeLocal) {
-        self.searchBar.placeholder = @"搜索本地光影...";
-        self.emptyLabel.text = @"未发现光影";
+        self.searchBar.placeholder = localize(@"shaders.search.local.placeholder", @"Search local shaders...");
+        self.emptyLabel.text = localize(@"shaders.empty.local", @"No shaders found");
         self.emptyLabel.hidden = self.localShaders.count > 0;
     } else {
-        self.searchBar.placeholder = @"在线搜索 Modrinth...";
-        self.emptyLabel.text = @"输入关键词进行在线搜索";
+        self.searchBar.placeholder = localize(@"shaders.search.online.placeholder", @"Search Modrinth...");
+        self.emptyLabel.text = localize(@"shaders.empty.online.prompt", @"Enter keywords to search online");
         self.emptyLabel.hidden = self.onlineSearchResults.count > 0;
     }
     self.tableView.refreshControl.enabled = YES;
@@ -204,7 +207,7 @@
             [self setLoading:NO];
             self.emptyLabel.hidden = self.onlineSearchResults.count > 0;
             if (self.onlineSearchResults.count == 0) {
-                self.emptyLabel.text = @"未找到在线结果";
+                self.emptyLabel.text = localize(@"shaders.empty.online.none", @"No online results found");
             }
             [self.tableView reloadData];
         });
@@ -253,7 +256,7 @@
     }
     self.emptyLabel.hidden = self.filteredLocalShaders.count > 0;
     if (!self.emptyLabel.hidden) {
-        self.emptyLabel.text = @"未找到本地光影";
+        self.emptyLabel.text = localize(@"shaders.empty.local.none", @"No local shaders found");
     }
     [self.tableView reloadData];
 }
@@ -285,17 +288,17 @@
         return nil;
     }
 
-    UIContextualAction *deleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"删除" handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
+    UIContextualAction *deleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:localize(@"Delete", nil) handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
 
         ShaderItem *shaderToDelete = self.filteredLocalShaders[indexPath.row];
 
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"确认删除" message:[NSString stringWithFormat:@"确定要删除 %@ 吗？\n此操作无法撤销。", shaderToDelete.displayName] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"shaders.delete.confirm.title", @"Delete shader") message:[NSString stringWithFormat:localize(@"shaders.delete.confirm.message", @"Are you sure you want to delete %@?\nThis action cannot be undone."), shaderToDelete.displayName] preferredStyle:UIAlertControllerStyleAlert];
 
-        [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil) style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             completionHandler(NO);
         }]];
 
-        [alert addAction:[UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:localize(@"Delete", nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
             NSError *error = nil;
             [[ShaderService sharedService] deleteShader:shaderToDelete error:&error];
 
@@ -350,7 +353,7 @@
     // Find the primary file to download
     NSDictionary *primaryFile = version.primaryFile;
     if (!primaryFile || ![primaryFile[@"url"] isKindOfClass:[NSString class]]) {
-        [self showSimpleAlertWithTitle:@"错误" message:@"未找到有效的下载链接。"];
+        [self showSimpleAlertWithTitle:localize(@"Error", nil) message:localize(@"shaders.invalid_download_link", @"No valid download link was found.")];
         return;
     }
 
@@ -362,7 +365,7 @@
 
 - (void)startDownloadForItem:(ShaderItem *)item {
     // Show a temporary "downloading" alert
-    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:@"正在下载"
+    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:localize(@"shaders.downloading.title", @"Downloading")
                                                                               message:[NSString stringWithFormat:@"%@...", item.displayName]
                                                                        preferredStyle:UIAlertControllerStyleAlert];
 
@@ -381,12 +384,12 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             [downloadingAlert dismissViewControllerAnimated:YES completion:^{
                 if (error) {
-                    [self showSimpleAlertWithTitle:@"下载失败" message:error.localizedDescription];
+                    [self showSimpleAlertWithTitle:localize(@"shaders.download.failed", @"Download failed") message:error.localizedDescription];
                 } else {
-                    UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"下载成功"
-                                                                                          message:[NSString stringWithFormat:@"%@ 已成功安装。", item.displayName]
+                    UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:localize(@"shaders.download.success", @"Download successful")
+                                                                                          message:[NSString stringWithFormat:localize(@"shaders.download.success.message", @"%@ was installed successfully."), item.displayName]
                                                                                    preferredStyle:UIAlertControllerStyleAlert];
-                    [successAlert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    [successAlert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         [self.modeSwitcher setSelectedSegmentIndex:0];
                         [self modeChanged:self.modeSwitcher];
                         [self refreshLocalShadersList];
@@ -400,7 +403,7 @@
 
 - (void)showSimpleAlertWithTitle:(NSString *)title message:(NSString *)message {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 
@@ -434,8 +437,8 @@
             [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
         }
     } else {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"链接不可用" message:@"该光影没有可用的在线链接。" preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:nil]];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"shaders.link.unavailable.title", @"Link unavailable") message:localize(@"shaders.link.unavailable.message", @"This shader pack does not have an online link available.") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }
 }

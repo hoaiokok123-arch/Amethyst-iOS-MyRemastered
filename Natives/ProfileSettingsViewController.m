@@ -20,7 +20,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.title = [NSString stringWithFormat:@"%@ 设置", self.profileName ?: @"版本"];
+    self.title = [NSString stringWithFormat:@"%@ - Cài đặt", self.profileName ?: @"Phiên bản"];
     self.view.backgroundColor = [UIColor clearColor];
     
     // 设置表格
@@ -75,9 +75,9 @@
 
 - (void)setupSections {
     self.sections = @[
-        @[@"模组管理"],
-        @[@"光影管理"],
-        @[@"渲染器", @"Java版本", @"内存分配"]
+        @[@"Quản lý mod"],
+        @[@"Quản lý shader"],
+        @[@"Renderer", @"Phiên bản Java", @"Phân bổ RAM"]
     ];
 }
 
@@ -108,9 +108,9 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     switch (section) {
-        case 0: return @"模组";
-        case 1: return @"光影";
-        case 2: return @"高级设置";
+        case 0: return @"Mod";
+        case 1: return @"Shader";
+        case 2: return @"Nâng cao";
         default: return nil;
     }
 }
@@ -140,15 +140,15 @@
             break;
             
         case 2: // 高级设置
-            if ([title isEqualToString:@"渲染器"]) {
+            if (indexPath.row == 0) {
                 cell.imageView.image = [UIImage systemImageNamed:@"cpu"];
                 cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 cell.detailTextLabel.text = [self rendererDisplayName:self.selectedRenderer];
-            } else if ([title isEqualToString:@"Java版本"]) {
+            } else if (indexPath.row == 1) {
                 cell.imageView.image = [UIImage systemImageNamed:@"j.square"];
                 cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-                cell.detailTextLabel.text = [self.selectedJavaVersion isEqualToString:@"auto"] ? @"自动" : self.selectedJavaVersion;
-            } else if ([title isEqualToString:@"内存分配"]) {
+                cell.detailTextLabel.text = [self.selectedJavaVersion isEqualToString:@"auto"] ? @"Tự động" : self.selectedJavaVersion;
+            } else if (indexPath.row == 2) {
                 cell.imageView.image = [UIImage systemImageNamed:@"memorychip"];
                 cell.accessoryType = UITableViewCellAccessoryNone;
                 cell.detailTextLabel.text = [NSString stringWithFormat:@"%ld MB / %ld MB", (long)self.allocatedMemory, (long)self.maxMemory];
@@ -161,7 +161,7 @@
 
 - (NSString *)rendererDisplayName:(NSString *)renderer {
     NSDictionary *names = @{
-        @"auto": @"自动",
+        @"auto": @"Tự động",
         @"zink": @"Zink (Vulkan)",
         @"gl4es": @"GL4ES (OpenGL ES)",
         @"angle": @"ANGLE (Metal)",
@@ -175,8 +175,6 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    NSString *title = self.sections[indexPath.section][indexPath.row];
-    
     switch (indexPath.section) {
         case 0: // 模组管理
             [self openModsManager];
@@ -187,11 +185,11 @@
             break;
             
         case 2: // 高级设置
-            if ([title isEqualToString:@"渲染器"]) {
+            if (indexPath.row == 0) {
                 [self showRendererSelector];
-            } else if ([title isEqualToString:@"Java版本"]) {
+            } else if (indexPath.row == 1) {
                 [self showJavaVersionSelector];
-            } else if ([title isEqualToString:@"内存分配"]) {
+            } else if (indexPath.row == 2) {
                 [self showMemoryAllocator];
             }
             break;
@@ -217,12 +215,12 @@
 }
 
 - (void)showRendererSelector {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择渲染器"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Chọn renderer"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
     NSArray *renderers = @[@"auto", @"zink", @"gl4es", @"angle", @"mobileglues"];
-    NSArray *displayNames = @[@"自动", @"Zink (Vulkan)", @"GL4ES (OpenGL ES)", @"ANGLE (Metal)", @"MobileGlues"];
+    NSArray *displayNames = @[@"Tự động", @"Zink (Vulkan)", @"GL4ES (OpenGL ES)", @"ANGLE (Metal)", @"MobileGlues"];
     
     for (NSInteger i = 0; i < renderers.count; i++) {
         NSString *renderer = renderers[i];
@@ -238,7 +236,7 @@
         }]];
     }
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil)
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     
@@ -254,11 +252,11 @@
 }
 
 - (void)showJavaVersionSelector {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择Java版本"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Chọn phiên bản Java"
                                                                    message:nil
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"自动选择"
+    [alert addAction:[UIAlertAction actionWithTitle:@"Tự động chọn"
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction * _Nonnull action) {
         self.selectedJavaVersion = @"auto";
@@ -290,7 +288,7 @@
         [self.tableView reloadData];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil)
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     
@@ -315,8 +313,8 @@
         [options addObject:@(mem)];
     }
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"分配内存"
-                                                                   message:[NSString stringWithFormat:@"设备总内存: %ld MB\n最大可分配: %ld MB", (long)(self.maxMemory / 0.8), (long)self.maxMemory]
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Phân bổ RAM"
+                                                                   message:[NSString stringWithFormat:@"Tổng RAM thiết bị: %ld MB\nTối đa có thể cấp: %ld MB", (long)(self.maxMemory / 0.8), (long)self.maxMemory]
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
     for (NSNumber *memNum in options) {
@@ -333,7 +331,7 @@
         }]];
     }
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"取消"
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil)
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
     

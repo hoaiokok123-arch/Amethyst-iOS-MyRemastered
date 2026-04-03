@@ -171,10 +171,10 @@
 - (void)showCurrentVersionSettings {
     NSString *currentProfile = PLProfiles.current.selectedProfileName;
     if (!currentProfile) {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示"
-                                                                       message:@"请先选择一个版本"
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Thông báo"
+                                                                       message:@"Hãy chọn một phiên bản trước."
                                                                 preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+        [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
         return;
     }

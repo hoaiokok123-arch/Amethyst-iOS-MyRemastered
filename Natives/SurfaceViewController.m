@@ -160,6 +160,7 @@ static int currentHotbarSlot = -1;
 static GameSurfaceView* pojavWindow;
 
 @interface SurfaceViewController ()<UITextFieldDelegate, UIGestureRecognizerDelegate> {
+    NSUInteger _trackedMouseButtonCounts[16];
 }
 
 @property(nonatomic) NSDictionary* metadata;
@@ -187,14 +188,95 @@ static GameSurfaceView* pojavWindow;
 
 @property(nonatomic, strong) TouchSender *touchSender;
 @property(nonatomic) long long touchControllerTransportHandle;
+@property(nonatomic) NSMutableSet<ControlButton *> *pressedMomentaryButtons;
+@property(nonatomic) BOOL longPressHoldingDropKey;
 
 // TouchController Text Input Support
 @property(nonatomic, strong) UITextField *touchControllerTextField;
 @property(nonatomic) BOOL touchControllerTextInputEnabled;
 
+@property(nonatomic) id appWillResignActiveObserver;
+@property(nonatomic) id appWillTerminateObserver;
+
 @end
 
 @implementation SurfaceViewController
+
+- (NSInteger)activeTouchControllerMode {
+    if (!getPrefBool(@"control.mod_touch_enable")) {
+        return 0;
+    }
+
+    NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    if (mode == 2 && self.touchControllerTransportHandle < 0) {
+        return 0;
+    }
+    return mode;
+}
+
+- (void)sendTrackedMouseButton:(int)button pressed:(BOOL)pressed {
+    if (button < 0 || button >= (int)(sizeof(_trackedMouseButtonCounts) / sizeof(_trackedMouseButtonCounts[0]))) {
+        CallbackBridge_nativeSendMouseButton(button, pressed, 0);
+        return;
+    }
+
+    NSUInteger *count = &_trackedMouseButtonCounts[button];
+    if (pressed) {
+        if (*count == 0) {
+            CallbackBridge_nativeSendMouseButton(button, 1, 0);
+        }
+        (*count)++;
+    } else {
+        if (*count > 0) {
+            (*count)--;
+        }
+        if (*count == 0) {
+            CallbackBridge_nativeSendMouseButton(button, 0, 0);
+        }
+    }
+}
+
+- (void)forceReleaseTrackedMouseButtons {
+    for (int button = 0; button < (int)(sizeof(_trackedMouseButtonCounts) / sizeof(_trackedMouseButtonCounts[0])); button++) {
+        if (_trackedMouseButtonCounts[button] == 0) {
+            continue;
+        }
+        _trackedMouseButtonCounts[button] = 0;
+        CallbackBridge_nativeSendMouseButton(button, 0, 0);
+    }
+}
+
+- (void)releaseLongPressState {
+    if (self.longPressHoldingDropKey) {
+        CallbackBridge_nativeSendKey(GLFW_KEY_Q, 0, 0, 0);
+        self.longPressHoldingDropKey = NO;
+    }
+
+    [self sendTrackedMouseButton:GLFW_MOUSE_BUTTON_LEFT pressed:NO];
+    self.shouldTriggerClick = YES;
+    currentHotbarSlot = -1;
+}
+
+- (void)releasePressedMomentaryButtons {
+    if (self.pressedMomentaryButtons.count == 0) {
+        self.swipingButton = nil;
+        return;
+    }
+
+    NSSet<ControlButton *> *pressedButtons = [self.pressedMomentaryButtons copy];
+    [self.pressedMomentaryButtons removeAllObjects];
+    self.swipingButton = nil;
+
+    for (ControlButton *button in pressedButtons) {
+        [self executebtn:button withAction:ACTION_UP];
+    }
+}
+
+- (void)resetTransientInputState {
+    [self releaseLongPressState];
+    [self releasePressedMomentaryButtons];
+    [self forceReleaseTrackedMouseButtons];
+}
 
 #pragma mark - TouchController Static Library Support
 
@@ -480,10 +562,6 @@ static GameSurfaceView* pojavWindow;
     [feedbackGenerator impactOccurred];
 
     // åæ¶åé VibrateMessage å° TouchController
-    if (self.touchControllerTransportHandle >= 0) {
-        NSData *messageData = [self encodeVibrateMessageWithKind:kind];
-        [TouchControllerBridge sendToTransport:self.touchControllerTransportHandle data:messageData];
-    }
 }
 
 #pragma mark - TouchController MoveView Support
@@ -634,6 +712,7 @@ static GameSurfaceView* pojavWindow;
     self = [super init];
     if (self) {
         self.metadata = metadata;
+        self.touchControllerTransportHandle = -1;
     }
     return self;
 }
@@ -648,6 +727,7 @@ static GameSurfaceView* pojavWindow;
 
     self.lightHaptic = [[UIImpactFeedbackGenerator alloc] initWithStyle:(UIImpactFeedbackStyleLight)];
     self.mediumHaptic = [[UIImpactFeedbackGenerator alloc] initWithStyle:(UIImpactFeedbackStyleMedium)];
+    self.pressedMomentaryButtons = [NSMutableSet set];
     
     UIApplication.sharedApplication.idleTimerDisabled = YES;
     BOOL isTVOS = realUIIdiom == UIUserInterfaceIdiomTV;
@@ -749,6 +829,20 @@ static GameSurfaceView* pojavWindow;
     [[NSNotificationCenter defaultCenter] addObserverForName:@"MousePointerUpdated" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
         [self reloadMousePointerImage];
     }];
+    self.appWillResignActiveObserver = [[NSNotificationCenter defaultCenter]
+        addObserverForName:UIApplicationWillResignActiveNotification
+                    object:nil
+                     queue:NSOperationQueue.mainQueue
+                usingBlock:^(NSNotification * _Nonnull note) {
+                    [self resetTransientInputState];
+                }];
+    self.appWillTerminateObserver = [[NSNotificationCenter defaultCenter]
+        addObserverForName:UIApplicationWillTerminateNotification
+                    object:nil
+                     queue:NSOperationQueue.mainQueue
+                usingBlock:^(NSNotification * _Nonnull note) {
+                    [self resetTransientInputState];
+                }];
 
     self.inputTextField = [[TrackedTextField alloc] initWithFrame:CGRectMake(0, -32.0, self.view.frame.size.width, 30.0)];
     self.inputTextField.backgroundColor = UIColor.secondarySystemBackgroundColor;
@@ -809,8 +903,8 @@ static GameSurfaceView* pojavWindow;
     self.touchSender = [[TouchSender alloc] init];
 
     // åå§å TouchController éæåº Transport
+    NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
     if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
         if (mode == 2 && [TouchControllerBridge isTouchControllerAvailable]) {
             // éæåºæ¨¡å¼ï¼åå»º Transport
             self.touchControllerTransportHandle = [TouchControllerBridge createTransportWithName:@"/tmp/touchcontroller.sock"];
@@ -852,6 +946,13 @@ static GameSurfaceView* pojavWindow;
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self setNeedsUpdateOfPrefersPointerLocked];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    if (self.isBeingDismissed || self.view.window == nil) {
+        [self resetTransientInputState];
+    }
 }
 
 - (void)updateAudioSettings {
@@ -992,7 +1093,7 @@ static GameSurfaceView* pojavWindow;
         if (!self.metadata) {
             NSLog(@"[SurfaceViewController] Error: metadata is nil");
             dispatch_async(dispatch_get_main_queue(), ^{
-                showDialog(localize(@"Error", nil), @"æ¸¸ææ°æ®å è½½å¤±è´¥ï¼è¯·éæ°éæ©çæ¬");
+                showDialog(localize(@"Error", nil), @"Dữ liệu game tải thất bại, hãy chọn lại phiên bản.");
             });
             return;
         }
@@ -1018,7 +1119,7 @@ static GameSurfaceView* pojavWindow;
         if (!currentAuth) {
             NSLog(@"[SurfaceViewController] Error: no authenticator available");
             dispatch_async(dispatch_get_main_queue(), ^{
-                showDialog(localize(@"Error", nil), @"è¯·åç»å½è´¦æ·");
+                showDialog(localize(@"Error", nil), @"Hãy đăng nhập tài khoản trước.");
             });
             return;
         }
@@ -1060,6 +1161,7 @@ static GameSurfaceView* pojavWindow;
         [button addTarget:self action:@selector(executebtn_down:) forControlEvents:UIControlEventTouchDown];
         [button addTarget:self action:@selector(executebtn_up_inside:) forControlEvents:UIControlEventTouchUpInside];
         [button addTarget:self action:@selector(executebtn_up_outside:) forControlEvents:UIControlEventTouchUpOutside];
+        [button addTarget:self action:@selector(executebtn_cancel:) forControlEvents:UIControlEventTouchCancel];
 
         if (isSwipeable) {
             UIPanGestureRecognizer *panRecognizerButton = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(executebtn_swipe:)];
@@ -1279,11 +1381,10 @@ static GameSurfaceView* pojavWindow;
     if (sender.state == UIGestureRecognizerStateRecognized) {
         if (currentHotbarSlot == -1) {
             if (!self.enableMouseGestures) return;
-            CallbackBridge_nativeSendMouseButton(isGrabbing == JNI_TRUE ?
-                GLFW_MOUSE_BUTTON_RIGHT : GLFW_MOUSE_BUTTON_LEFT, 1, 0);
+            int button = isGrabbing == JNI_TRUE ? GLFW_MOUSE_BUTTON_RIGHT : GLFW_MOUSE_BUTTON_LEFT;
+            [self sendTrackedMouseButton:button pressed:YES];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 33 * NSEC_PER_MSEC), dispatch_get_main_queue(), ^{
-                CallbackBridge_nativeSendMouseButton(isGrabbing == JNI_TRUE ?
-                    GLFW_MOUSE_BUTTON_RIGHT : GLFW_MOUSE_BUTTON_LEFT, 0, 0);
+                [self sendTrackedMouseButton:button pressed:NO];
             });
         } else {
             CallbackBridge_nativeSendKey(currentHotbarSlot, 0, 1, 0);
@@ -1346,10 +1447,11 @@ static GameSurfaceView* pojavWindow;
     if (sender.state == UIGestureRecognizerStateBegan) {
         self.shouldTriggerClick = NO;
         if (currentHotbarSlot == -1) {
-
-            if (self.enableMouseGestures)
-                CallbackBridge_nativeSendMouseButton(GLFW_MOUSE_BUTTON_LEFT, 1, 0);
+            if (self.enableMouseGestures) {
+                [self sendTrackedMouseButton:GLFW_MOUSE_BUTTON_LEFT pressed:YES];
+            }
         } else {
+            self.longPressHoldingDropKey = YES;
             CallbackBridge_nativeSendKey(GLFW_KEY_Q, 0, 1, 0);
         }
     } else if (sender.state == UIGestureRecognizerStateChanged) {
@@ -1357,12 +1459,7 @@ static GameSurfaceView* pojavWindow;
         || sender.state == UIGestureRecognizerStateFailed
             || sender.state == UIGestureRecognizerStateEnded)
     {
-        if (currentHotbarSlot == -1) {
-            if (self.enableMouseGestures)
-                CallbackBridge_nativeSendMouseButton(GLFW_MOUSE_BUTTON_LEFT, 0, 0);
-        } else {
-            CallbackBridge_nativeSendKey(GLFW_KEY_Q, 0, 0, 0);
-        }
+        [self releaseLongPressState];
     }
 }
 
@@ -1413,13 +1510,13 @@ static GameSurfaceView* pojavWindow;
                     }
                     break;
                 case SPECIALBTN_MOUSEPRI:
-                    CallbackBridge_nativeSendMouseButton(GLFW_MOUSE_BUTTON_LEFT, held, 0);
+                    [self sendTrackedMouseButton:GLFW_MOUSE_BUTTON_LEFT pressed:held];
                     break;
                 case SPECIALBTN_MOUSESEC:
-                    CallbackBridge_nativeSendMouseButton(GLFW_MOUSE_BUTTON_RIGHT, held, 0);
+                    [self sendTrackedMouseButton:GLFW_MOUSE_BUTTON_RIGHT pressed:held];
                     break;
                 case SPECIALBTN_MOUSEMID:
-                    CallbackBridge_nativeSendMouseButton(GLFW_MOUSE_BUTTON_MIDDLE, held, 0);
+                    [self sendTrackedMouseButton:GLFW_MOUSE_BUTTON_MIDDLE pressed:held];
                     break;
                 case SPECIALBTN_TOGGLECTRL:
                     [self executebtn_special_togglebtn:held];
@@ -1454,7 +1551,10 @@ static GameSurfaceView* pojavWindow;
 - (void)executebtn_down:(ControlButton *)sender
 {
     if(self.shouldTriggerHaptic) { [self.lightHaptic impactOccurred]; }
-    if (sender.savedBackgroundColor == nil) { [self executebtn:sender withAction:ACTION_DOWN]; }
+    if (sender.savedBackgroundColor == nil) {
+        [self.pressedMomentaryButtons addObject:sender];
+        [self executebtn:sender withAction:ACTION_DOWN];
+    }
     if ([self.swipeableButtons containsObject:sender]) { self.swipingButton = sender; }
 }
 
@@ -1469,6 +1569,7 @@ static GameSurfaceView* pojavWindow;
         if (CGRectContainsPoint(button.frame, location) && (ControlButton *)self.swipingButton != button) {
             [self executebtn_up:self.swipingButton isOutside:NO];
             self.swipingButton = (ControlButton *)button;
+            [self.pressedMomentaryButtons addObject:self.swipingButton];
             [self executebtn:self.swipingButton withAction:ACTION_DOWN];
             break;
         }
@@ -1477,6 +1578,11 @@ static GameSurfaceView* pojavWindow;
 
 - (void)executebtn_up:(ControlButton *)sender isOutside:(BOOL)isOutside
 {
+    if (sender == nil) {
+        return;
+    }
+
+    [self.pressedMomentaryButtons removeObject:sender];
     if (self.swipingButton == sender) {
         [self executebtn:self.swipingButton withAction:ACTION_UP];
         self.swipingButton = nil;
@@ -1501,6 +1607,7 @@ static GameSurfaceView* pojavWindow;
 
 - (void)executebtn_up_inside:(ControlButton *)sender { [self executebtn_up:sender isOutside:NO]; }
 - (void)executebtn_up_outside:(ControlButton *)sender { [self executebtn_up:sender isOutside:YES]; }
+- (void)executebtn_cancel:(ControlButton *)sender { [self executebtn_up:sender isOutside:YES]; }
 
 - (void)executebtn_special_togglebtn:(int)held {
     if (held) return;
@@ -1560,8 +1667,8 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 
     [super touchesBegan:touches withEvent:event];
 
-    if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    NSInteger mode = [self activeTouchControllerMode];
+    if (mode != 0) {
 
         if (mode == 1) {  // UDP æ¨¡å¼
             for (UITouch *touch in touches) {
@@ -1607,8 +1714,8 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    NSInteger mode = [self activeTouchControllerMode];
+    if (mode != 0) {
 
         if (mode == 1) {  // UDP æ¨¡å¼
             for (UITouch *touch in touches) {
@@ -1655,8 +1762,8 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    NSInteger mode = [self activeTouchControllerMode];
+    if (mode != 0) {
 
         if (mode == 1) {  // UDP æ¨¡å¼
             for (UITouch *touch in touches) {
@@ -1684,8 +1791,8 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if (getPrefBool(@"control.mod_touch_enable")) {
-        NSInteger mode = [getPrefObject(@"control.mod_touch_mode") integerValue];
+    NSInteger mode = [self activeTouchControllerMode];
+    if (mode != 0) {
 
         if (mode == 1) {  // UDP æ¨¡å¼
             for (UITouch *touch in touches) {
@@ -1706,6 +1813,7 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
     }
 
     [super touchesCancelled:touches withEvent:event];
+    [self releaseLongPressState];
     [self touchesEndedGlobal:touches withEvent:event];
 }
 
@@ -1742,7 +1850,13 @@ static NSMutableDictionary *s_touchToFingerIdMap = nil;
 }
 
 - (void)dealloc {
-    // æ¸ç TouchController èµæº
+    [self resetTransientInputState];
+    if (self.appWillResignActiveObserver) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self.appWillResignActiveObserver];
+    }
+    if (self.appWillTerminateObserver) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self.appWillTerminateObserver];
+    }
     if (self.touchControllerTransportHandle >= 0) {
         [TouchControllerBridge destroyTransport:self.touchControllerTransportHandle];
         self.touchControllerTransportHandle = -1;

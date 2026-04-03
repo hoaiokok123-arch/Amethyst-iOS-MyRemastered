@@ -129,7 +129,7 @@ static NSString *const kGitHubIssuesURL = @"https://github.com/herbrine8403/Amet
     CGFloat panelHeight = _leftPanel.bounds.size.height;
     CGFloat sidePadding = 16;
     
-    // 顶部标签条 "崩溃界面"
+    // 顶部标签条 "Màn hình crash"
     UIView *labelBar = [[UIView alloc] initWithFrame:CGRectMake(sidePadding, 0, panelWidth - sidePadding * 2, 36)];
     labelBar.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.15];
     labelBar.layer.cornerRadius = 8;
@@ -162,7 +162,7 @@ static NSString *const kGitHubIssuesURL = @"https://github.com/herbrine8403/Amet
     _logTextView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [_logPanel addSubview:_logTextView];
     
-    // 占位符标签 "日志信息"（日志为空时显示）
+    // 占位符标签 "Thông tin nhật ký"（日志为空时显示）
     _logPlaceholderLabel = [[UILabel alloc] initWithFrame:_logPanel.bounds];
     _logPlaceholderLabel.text = localize(@"crash.log_info", nil);
     _logPlaceholderLabel.font = [UIFont systemFontOfSize:48 weight:UIFontWeightBold];

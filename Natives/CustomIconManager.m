@@ -33,7 +33,7 @@
     NSData *imageData = UIImagePNGRepresentation(image);
     if (!imageData) {
         if (completion) {
-            completion(NO, [NSError errorWithDomain:@"CustomIconError" code:1001 userInfo:@{NSLocalizedDescriptionKey: @"无法将图片转换为PNG数据"}]);
+            completion(NO, [NSError errorWithDomain:@"CustomIconError" code:1001 userInfo:@{NSLocalizedDescriptionKey: @"Không thể chuyển ảnh sang dữ liệu PNG"}]);
         }
         return;
     }
@@ -50,7 +50,7 @@
     // 检查是否支持替换图标
     if (!UIApplication.sharedApplication.supportsAlternateIcons) {
         if (completion) {
-            completion(NO, [NSError errorWithDomain:@"CustomIconError" code:1002 userInfo:@{NSLocalizedDescriptionKey: @"当前设备不支持替换应用图标"}]);
+            completion(NO, [NSError errorWithDomain:@"CustomIconError" code:1002 userInfo:@{NSLocalizedDescriptionKey: @"Thiết bị hiện tại không hỗ trợ thay biểu tượng ứng dụng"}]);
         }
         return;
     }
@@ -58,7 +58,7 @@
     // 检查自定义图标是否存在
     if (![self.fileManager fileExistsAtPath:self.customIconPath]) {
         if (completion) {
-            completion(NO, [NSError errorWithDomain:@"CustomIconError" code:1003 userInfo:@{NSLocalizedDescriptionKey: @"自定义图标文件不存在"}]);
+            completion(NO, [NSError errorWithDomain:@"CustomIconError" code:1003 userInfo:@{NSLocalizedDescriptionKey: @"Tệp biểu tượng tùy chỉnh không tồn tại"}]);
         }
         return;
     }
@@ -67,7 +67,7 @@
     NSData *imageData = [NSData dataWithContentsOfFile:self.customIconPath];
     if (!imageData) {
         if (completion) {
-            completion(NO, [NSError errorWithDomain:@"CustomIconError" code:1004 userInfo:@{NSLocalizedDescriptionKey: @"无法读取自定义图标文件"}]);
+            completion(NO, [NSError errorWithDomain:@"CustomIconError" code:1004 userInfo:@{NSLocalizedDescriptionKey: @"Không thể đọc tệp biểu tượng tùy chỉnh"}]);
         }
         return;
     }

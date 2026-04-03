@@ -38,6 +38,38 @@ static void *ProgressObserverContext = &ProgressObserverContext;
 
 @implementation LauncherNavigationController
 
+- (CGRect)toolbarContentRect {
+    if (self.toolbar == nil) {
+        return CGRectZero;
+    }
+
+    UIEdgeInsets safeInsets = self.toolbar.safeAreaInsets;
+    return UIEdgeInsetsInsetRect(self.toolbar.bounds, UIEdgeInsetsMake(4.0, 4.0, safeInsets.bottom + 4.0, 4.0));
+}
+
+- (void)layoutToolbarContents {
+    CGRect contentRect = [self toolbarContentRect];
+    if (CGRectIsEmpty(contentRect) || contentRect.size.width <= 0 || contentRect.size.height <= 0) {
+        return;
+    }
+
+    CGFloat spacing = 8.0;
+    CGFloat buttonWidth = floor(contentRect.size.width * 0.24);
+    buttonWidth = MAX(96.0, MIN(buttonWidth, contentRect.size.width * 0.35));
+
+    CGFloat fieldWidth = MAX(0, contentRect.size.width - buttonWidth - spacing);
+    CGRect fieldFrame = CGRectMake(contentRect.origin.x, contentRect.origin.y, fieldWidth, contentRect.size.height);
+    CGRect buttonFrame = CGRectMake(CGRectGetMaxX(contentRect) - buttonWidth, contentRect.origin.y, buttonWidth, contentRect.size.height);
+
+    self.versionTextField.frame = fieldFrame;
+    self.progressText.frame = fieldFrame;
+    self.buttonInstall.frame = buttonFrame;
+    self.progressViewMain.frame = CGRectMake(0, 0, self.toolbar.bounds.size.width, 4);
+
+    CGFloat accessorySize = MIN(30.0, MAX(18.0, CGRectGetHeight(fieldFrame) * 0.7));
+    self.versionTextField.rightView.frame = CGRectMake(0, 0, accessorySize, accessorySize);
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -49,7 +81,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     self.versionTextField = [[PickTextField alloc] initWithFrame:CGRectMake(4, 4, self.toolbar.frame.size.width * 0.8 - 8, self.toolbar.frame.size.height - 8)];
     [self.versionTextField addTarget:self.versionTextField action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
     self.versionTextField.autoresizingMask = AUTORESIZE_MASKS;
-    self.versionTextField.placeholder = @"Specify version...";
+    self.versionTextField.placeholder = localize(@"preference.placeholder.version", nil);
     self.versionTextField.leftView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
     self.versionTextField.rightView = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"SpinnerArrow"] _imageWithSize:CGSizeMake(30, 30)]];
     self.versionTextField.rightView.frame = CGRectMake(0, 0, self.versionTextField.frame.size.height * 0.9, self.versionTextField.frame.size.height * 0.9);
@@ -103,6 +135,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     self.progressText.textAlignment = NSTextAlignmentCenter;
     self.progressText.userInteractionEnabled = NO;
     [targetToolbar addSubview:self.progressText];
+    [self layoutToolbarContents];
 
     [self fetchRemoteVersionList];
     [NSNotificationCenter.defaultCenter addObserver:self
@@ -488,6 +521,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
+    [self layoutToolbarContents];
     // 发送通知更新账户信息
     [[NSNotificationCenter defaultCenter] postNotificationName:@"UpdateAccountInfo" object:nil];
 }

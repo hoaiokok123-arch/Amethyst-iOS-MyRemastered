@@ -83,7 +83,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             UIImage *selectedImage = info[UIImagePickerControllerOriginalImage];
             if (!selectedImage) {
-                [self showCustomIconError:@"无法获取选中的图片"];
+                [self showCustomIconError:localize(@"preference.custom_icon.error.get_selected_image", nil)];
                 return;
             }
             if (self.pickingMousePointer) {
@@ -94,9 +94,9 @@
                 BOOL ok = [pngData writeToFile:path atomically:YES];
                 if (ok) {
                     [NSNotificationCenter.defaultCenter postNotificationName:@"MousePointerUpdated" object:nil];
-                    [self showSuccessMessage:@"鼠标指针已更新"];
+                    [self showSuccessMessage:localize(@"preference.mouse_pointer.updated", nil)];
                 } else {
-                    [self showCustomIconError:@"保存鼠标指针失败"];
+                    [self showCustomIconError:localize(@"preference.mouse_pointer.save_failed", nil)];
                 }
                 return;
             }
@@ -114,18 +114,18 @@
                         [[CustomIconManager sharedManager] saveCustomIcon:croppedImage withCompletion:^(BOOL success, NSError * _Nullable error) {
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 if (success) {
-                                    [weakSelf showSuccessMessage:@"图片已保存，您可以在应用图标设置中选择自定义图标"];
+                                    [weakSelf showSuccessMessage:localize(@"preference.custom_icon.saved", nil)];
                                     // 更新应用图标选择器的显示
                                     [weakSelf.tableView reloadData];
                                 } else {
-                                    NSString *errorMessage = error.localizedDescription ?: @"保存自定义图标失败";
+                                    NSString *errorMessage = error.localizedDescription ?: localize(@"preference.custom_icon.save_failed", nil);
                                     [weakSelf showCustomIconError:errorMessage];
                                 }
                             });
                         }];
                     } else {
                         dispatch_async(dispatch_get_main_queue(), ^{
-                            [weakSelf showCustomIconError:@"图片裁剪已取消"];
+                            [weakSelf showCustomIconError:localize(@"preference.custom_icon.crop_cancelled", nil)];
                         });
                     }
                 };
@@ -135,11 +135,11 @@
                 [[CustomIconManager sharedManager] saveCustomIcon:selectedImage withCompletion:^(BOOL success, NSError * _Nullable error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         if (success) {
-                            [self showSuccessMessage:@"图片已保存，您可以在应用图标设置中选择自定义图标"];
+                            [self showSuccessMessage:localize(@"preference.custom_icon.saved", nil)];
                             // 更新应用图标选择器的显示
                             [self.tableView reloadData];
                         } else {
-                            NSString *errorMessage = error.localizedDescription ?: @"保存自定义图标失败";
+                            NSString *errorMessage = error.localizedDescription ?: localize(@"preference.custom_icon.save_failed", nil);
                             [self showCustomIconError:errorMessage];
                         }
                     });
@@ -155,7 +155,7 @@
             if (self.pickingMousePointer) {
                 self.pickingMousePointer = NO;
             } else {
-                [self showCustomIconError:@"图片选择已取消"];
+                [self showCustomIconError:localize(@"preference.custom_icon.selection_cancelled", nil)];
             }
         });
     }];
@@ -164,7 +164,7 @@
 #pragma mark - Custom Icon Helper Methods
 
 - (void)showProcessingIndicator {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"处理中" message:@"正在处理您选择的图片..." preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Processing", nil) message:localize(@"preference.custom_icon.processing_message", nil) preferredStyle:UIAlertControllerStyleAlert];
     [self presentViewController:alert animated:YES completion:nil];
     
     // 2秒后自动关闭提示
@@ -174,15 +174,15 @@
 }
 
 - (void)showSuccessMessage:(NSString *)message {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"成功" message:message preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Success", nil) message:message preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil];
     [alert addAction:okAction];
     [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)showCustomIconError:(NSString *)errorMessage {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"错误" message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Error", nil) message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil];
     [alert addAction:okAction];
     [self presentViewController:alert animated:YES completion:nil];
 }
@@ -285,8 +285,8 @@
                   } else if ([iconName isEqualToString:@"CustomIcon"]) {
                       if (![[CustomIconManager sharedManager] hasCustomIcon]) {
                           dispatch_async(dispatch_get_main_queue(), ^{
-                              UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"请先设置自定义应用图标：设置 > 自定义应用图标" preferredStyle:UIAlertControllerStyleAlert];
-                              UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+                              UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Notice", nil) message:localize(@"preference.custom_icon.setup_required", nil) preferredStyle:UIAlertControllerStyleAlert];
+                              UIAlertAction *okAction = [UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil];
                               [alert addAction:okAction];
                               [self presentViewController:alert animated:YES completion:nil];
                           });
@@ -538,7 +538,7 @@
                     NSString *path = [NSString stringWithFormat:@"%s/controlmap/mouse_pointer.png", getenv("POJAV_HOME")];
                     [NSFileManager.defaultManager removeItemAtPath:path error:nil];
                     [NSNotificationCenter.defaultCenter postNotificationName:@"MousePointerUpdated" object:nil];
-                    [self showSuccessMessage:@"鼠标指针已恢复默认"];
+                    [self showSuccessMessage:localize(@"preference.mouse_pointer.reset", nil)];
                 }
             },
             @{@"key": @"hardware_hide",
@@ -567,34 +567,34 @@
                   NSString *title = localize(@"preference.title.two_finger_keyboard", nil);
                   // 如果没有 localization，设置默认标题
                   if (!title || [title isEqualToString:@"preference.title.two_finger_keyboard"]) {
-                      title = @"双指呼出键盘";
+                      title = localize(@"preference.title.two_finger_keyboard", nil);
                   }
                   
-                  NSString *statusMsg = isOn ? @"[✓] 当前状态: 已开启 (ON)" : @"[✗] 当前状态: 已关闭 (OFF)";
-                  NSString *msg = [NSString stringWithFormat:@"%@\n\n开启后，在游戏中双指同时长按屏幕可呼出键盘。\n此功能由WeiErLiTeo制作。", statusMsg];
+                  NSString *statusMsg = isOn ? localize(@"preference.two_finger_keyboard.status.enabled", nil) : localize(@"preference.two_finger_keyboard.status.disabled", nil);
+                  NSString *msg = [NSString stringWithFormat:localize(@"preference.two_finger_keyboard.message", nil), statusMsg];
                   
                   UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:msg preferredStyle:UIAlertControllerStyleAlert];
                   
                   // 3. 根据当前状态显示不同的按钮
                   if (!isOn) {
-                      [alert addAction:[UIAlertAction actionWithTitle:@"开启 (Enable)" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                      [alert addAction:[UIAlertAction actionWithTitle:localize(@"preference.two_finger_keyboard.action.enable", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                           // 强制开启
                           setPrefBool(@"control.two_finger_keyboard", YES);
-                          [weakSelf showSuccessMessage:@"双指呼出键盘已开启"];
+                          [weakSelf showSuccessMessage:localize(@"preference.two_finger_keyboard.enabled", nil)];
                           // 刷新界面
                           [weakSelf.tableView reloadData];
                       }]];
                   } else {
-                      [alert addAction:[UIAlertAction actionWithTitle:@"关闭 (Disable)" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+                      [alert addAction:[UIAlertAction actionWithTitle:localize(@"preference.two_finger_keyboard.action.disable", nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
                           // 强制关闭
                           setPrefBool(@"control.two_finger_keyboard", NO);
-                          [weakSelf showSuccessMessage:@"双指呼出键盘已关闭"];
+                          [weakSelf showSuccessMessage:localize(@"preference.two_finger_keyboard.disabled", nil)];
                           // 刷新界面
                           [weakSelf.tableView reloadData];
                       }]];
                   }
                   
-                  [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+                  [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil) style:UIAlertActionStyleCancel handler:nil]];
                   
                   [weakSelf presentViewController:alert animated:YES completion:nil];
               }

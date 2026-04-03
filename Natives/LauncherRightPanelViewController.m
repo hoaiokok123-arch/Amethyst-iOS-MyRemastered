@@ -96,7 +96,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     self.usernameLabel.font = [UIFont boldSystemFontOfSize:16];
     self.usernameLabel.textColor = [UIColor labelColor];
     self.usernameLabel.textAlignment = NSTextAlignmentCenter;
-    self.usernameLabel.text = @"未登录";
+    self.usernameLabel.text = @"Chưa đăng nhập";
     [self.view addSubview:self.usernameLabel];
     
     // 版本标签
@@ -105,7 +105,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     self.versionLabel.font = [UIFont systemFontOfSize:13];
     self.versionLabel.textColor = [UIColor secondaryLabelColor];
     self.versionLabel.textAlignment = NSTextAlignmentCenter;
-    self.versionLabel.text = @"未选择版本";
+    self.versionLabel.text = @"Chưa chọn phiên bản";
     [self.view addSubview:self.versionLabel];
     
     // 进度标签
@@ -127,7 +127,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     // 启动游戏按钮
     self.launchButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.launchButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.launchButton setTitle:@"启动游戏" forState:UIControlStateNormal];
+    [self.launchButton setTitle:@"Vào game" forState:UIControlStateNormal];
     [self.launchButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     self.launchButton.titleLabel.font = [UIFont boldSystemFontOfSize:18];
     self.launchButton.backgroundColor = [UIColor colorWithRed:0.26 green:0.63 blue:0.96 alpha:1.0];
@@ -139,7 +139,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     // 编辑控件按钮
     self.manageVersionBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     self.manageVersionBtn.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.manageVersionBtn setTitle:@"编辑控件" forState:UIControlStateNormal];
+    [self.manageVersionBtn setTitle:@"Sửa điều khiển" forState:UIControlStateNormal];
     [self.manageVersionBtn setTitleColor:[UIColor labelColor] forState:UIControlStateNormal];
     self.manageVersionBtn.backgroundColor = [UIColor colorWithWhite:0.2 alpha:1.0];
     self.manageVersionBtn.layer.cornerRadius = 8;
@@ -149,7 +149,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     // 执行JAR按钮
     self.executeJarBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     self.executeJarBtn.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.executeJarBtn setTitle:@"执行Jar" forState:UIControlStateNormal];
+    [self.executeJarBtn setTitle:@"Chạy JAR" forState:UIControlStateNormal];
     [self.executeJarBtn setTitleColor:[UIColor labelColor] forState:UIControlStateNormal];
     self.executeJarBtn.backgroundColor = [UIColor colorWithWhite:0.2 alpha:1.0];
     self.executeJarBtn.layer.cornerRadius = 8;
@@ -166,40 +166,40 @@ static void *ProgressObserverContext = &ProgressObserverContext;
         
         // 用户名
         [self.usernameLabel.topAnchor constraintEqualToAnchor:self.avatarImageView.bottomAnchor constant:12],
-        [self.usernameLabel.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
-        [self.usernameLabel.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [self.usernameLabel.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.usernameLabel.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         
         // 版本
         [self.versionLabel.topAnchor constraintEqualToAnchor:self.usernameLabel.bottomAnchor constant:4],
-        [self.versionLabel.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
-        [self.versionLabel.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [self.versionLabel.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.versionLabel.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         
         // 进度标签
         [self.progressLabel.topAnchor constraintEqualToAnchor:self.versionLabel.bottomAnchor constant:8],
-        [self.progressLabel.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
-        [self.progressLabel.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [self.progressLabel.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.progressLabel.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         
         // 进度条
         [self.progressView.topAnchor constraintEqualToAnchor:self.progressLabel.bottomAnchor constant:4],
-        [self.progressView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
-        [self.progressView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [self.progressView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.progressView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         
         // 执行JAR按钮 (最底部)
         [self.executeJarBtn.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor constant:-20],
-        [self.executeJarBtn.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
-        [self.executeJarBtn.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [self.executeJarBtn.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.executeJarBtn.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         [self.executeJarBtn.heightAnchor constraintEqualToConstant:40],
         
         // 管理版本按钮
         [self.manageVersionBtn.bottomAnchor constraintEqualToAnchor:self.executeJarBtn.topAnchor constant:-8],
-        [self.manageVersionBtn.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
-        [self.manageVersionBtn.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [self.manageVersionBtn.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.manageVersionBtn.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         [self.manageVersionBtn.heightAnchor constraintEqualToConstant:40],
         
         // 启动按钮
         [self.launchButton.bottomAnchor constraintEqualToAnchor:self.manageVersionBtn.topAnchor constant:-16],
-        [self.launchButton.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
-        [self.launchButton.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+        [self.launchButton.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:16],
+        [self.launchButton.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         [self.launchButton.heightAnchor constraintEqualToConstant:50]
     ]];
 }
@@ -268,19 +268,19 @@ static void *ProgressObserverContext = &ProgressObserverContext;
 - (void)launchGame {
     BaseAuthenticator *currentAuth = BaseAuthenticator.current;
     if (!currentAuth) {
-        [self showAlert:@"请先登录账户"];
+        [self showAlert:@"Hãy đăng nhập tài khoản trước."];
         return;
     }
     
     NSString *selectedProfile = PLProfiles.current.selectedProfileName;
     if (!selectedProfile) {
-        [self showAlert:@"请先选择一个版本"];
+        [self showAlert:@"Hãy chọn một phiên bản trước."];
         return;
     }
     
     NSString *versionId = PLProfiles.current.profiles[selectedProfile][@"lastVersionId"];
     if (!versionId) {
-        [self showAlert:@"无法获取版本信息"];
+        [self showAlert:@"Không thể lấy thông tin phiên bản."];
         return;
     }
     
@@ -302,7 +302,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
             // 如果在远程列表中找不到，可能是本地版本
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self setInteractionEnabled:YES];
-                [self showAlert:@"找不到版本信息，请检查版本是否正确"];
+                [self showAlert:@"Không tìm thấy thông tin phiên bản. Hãy kiểm tra lại phiên bản đã chọn."];
             });
         }
     };
@@ -342,15 +342,15 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     self.executeJarBtn.enabled = enabled;
     
     if (enabled) {
-        [self.launchButton setTitle:@"启动游戏" forState:UIControlStateNormal];
+        [self.launchButton setTitle:@"Vào game" forState:UIControlStateNormal];
         self.progressView.hidden = YES;
         self.progressLabel.hidden = YES;
         self.progressLabel.text = @"";
     } else {
-        [self.launchButton setTitle:@"下载中..." forState:UIControlStateNormal];
+        [self.launchButton setTitle:@"Đang tải..." forState:UIControlStateNormal];
         self.progressView.hidden = NO;
         self.progressLabel.hidden = NO;
-        self.progressLabel.text = @"正在准备...";
+        self.progressLabel.text = @"Đang chuẩn bị...";
     }
     
     UIApplication.sharedApplication.idleTimerDisabled = !enabled;
@@ -442,10 +442,10 @@ static void *ProgressObserverContext = &ProgressObserverContext;
         return;
     }
     
-    self.progressLabel.text = @"等待 JIT...";
+    self.progressLabel.text = @"Đang chờ JIT...";
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"等待 JIT"
-                                                                   message:hasTrollStoreJIT ? @"正在通过 TrollStore 启用 JIT..." : @"请启用 JIT"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Đang chờ JIT"
+                                                                   message:hasTrollStoreJIT ? @"Đang bật JIT qua TrollStore..." : @"Hãy bật JIT"
                                                             preferredStyle:UIAlertControllerStyleAlert];
     [self presentViewController:alert animated:YES completion:nil];
     
@@ -460,10 +460,10 @@ static void *ProgressObserverContext = &ProgressObserverContext;
 }
 
 - (void)showAlert:(NSString *)message {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示"
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Thông báo"
                                                                    message:message
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 
@@ -495,7 +495,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
             });
         }
     } else {
-        self.usernameLabel.text = @"未登录";
+        self.usernameLabel.text = @"Chưa đăng nhập";
         self.avatarImageView.image = [UIImage systemImageNamed:@"person.circle.fill"];
     }
 }
@@ -509,7 +509,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
             self.versionLabel.text = versionId;
         }
     } else {
-        self.versionLabel.text = @"未选择版本";
+        self.versionLabel.text = @"Chưa chọn phiên bản";
     }
 }
 

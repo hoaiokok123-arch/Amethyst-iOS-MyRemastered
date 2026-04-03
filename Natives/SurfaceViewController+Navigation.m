@@ -8,17 +8,34 @@
 @implementation SurfaceViewController(Navigation)
 
 static UIView *menuSwipeView;
+static CGFloat gameMenuWidthForBounds(CGRect bounds) {
+    return MAX(160.0, bounds.size.width * 0.3 - 36.0 * 0.7);
+}
+
+static CGRect gameMenuSwipeFrame(SurfaceViewController *controller, CGRect bounds) {
+    UIEdgeInsets safeInsets = controller.view.safeAreaInsets;
+    return CGRectMake(bounds.size.width, safeInsets.top, 30.0, MAX(0, bounds.size.height - safeInsets.top - safeInsets.bottom));
+}
+
+static CGRect gameMenuFrame(SurfaceViewController *controller, CGRect bounds, CGFloat rootWidth) {
+    UIEdgeInsets safeInsets = controller.view.safeAreaInsets;
+    CGFloat preferredHeight = MAX(controller.menuView.contentSize.height, controller.menuArray.count * 44.0);
+    CGFloat maxHeight = MAX(44.0, bounds.size.height - safeInsets.top - safeInsets.bottom);
+    return CGRectMake(rootWidth, safeInsets.top, gameMenuWidthForBounds(bounds), MIN(preferredHeight, maxHeight));
+}
+
 - (void)initCategory_Navigation {
     UIPanGestureRecognizer *menuPanGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleRightEdge:)];
     menuPanGesture.delegate = self;
 
-    UIView *menuSwipeLineView = [[UIView alloc] initWithFrame:CGRectMake(11.0, self.view.frame.size.height/2 - 100.0, 8.0, 200.0)];
+    CGRect swipeFrame = gameMenuSwipeFrame(self, self.view.bounds);
+    UIView *menuSwipeLineView = [[UIView alloc] initWithFrame:CGRectMake(11.0, MAX(0, (swipeFrame.size.height - 200.0) / 2.0), 8.0, 200.0)];
     menuSwipeLineView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
     menuSwipeLineView.backgroundColor = UIColor.whiteColor;
     menuSwipeLineView.layer.cornerRadius = 4;
     menuSwipeLineView.userInteractionEnabled = NO;
 
-    UIView *menuSwipeView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.size.width, 0, 30.0, self.view.frame.size.height)];
+    menuSwipeView = [[UIView alloc] initWithFrame:swipeFrame];
     menuSwipeView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleLeftMargin;
     menuSwipeView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.1];
     [menuSwipeView addGestureRecognizer:menuPanGesture];
@@ -27,8 +44,7 @@ static UIView *menuSwipeView;
 
     self.menuArray = @[@"game.menu.force_close", @"game.menu.log_output", @"game.menu.custom_controls", @"Settings"];
 
-    self.menuView = [[UITableView alloc] initWithFrame:CGRectMake(self.view.frame.size.width + 30.0, 0, 
-        self.view.frame.size.width * 0.3 - 36.0 * 0.7, self.view.frame.size.height)];
+    self.menuView = [[UITableView alloc] initWithFrame:gameMenuFrame(self, self.view.bounds, self.rootView.frame.size.width)];
 
     //menuView.backgroundColor = [UIColor colorWithRed:240.0/255.0 green:240.0/255.0 blue:240.0/255.0 alpha:1];
     self.menuView.dataSource = self;
@@ -36,6 +52,7 @@ static UIView *menuSwipeView;
     self.menuView.hidden = YES;
     self.menuView.layer.cornerRadius = 12;
     self.menuView.scrollEnabled = NO;
+    self.menuView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     self.menuView.separatorInset = UIEdgeInsetsZero;
     [self.view addSubview:self.menuView];
 }
@@ -56,7 +73,7 @@ static CGPoint lastCenterPoint;
         self.rootView.center = CGPointMake(lastCenterPoint.x, centerY);
         self.rootView.transform = CGAffineTransformScale(CGAffineTransformIdentity, scale, scale);
         self.menuView.transform = CGAffineTransformScale(CGAffineTransformIdentity, (1.1-scale)*2.5, (1.1-scale)*2.5);
-        self.menuView.frame = CGRectMake(self.rootView.frame.size.width, self.rootView.frame.origin.y, self.menuView.frame.size.width, self.menuView.contentSize.height);
+        self.menuView.frame = gameMenuFrame(self, self.view.bounds, self.rootView.frame.size.width);
     } completion:^(BOOL finished) {
         self.menuView.hidden = scale == 1.0;
         [self setNeedsUpdateOfHomeIndicatorAutoHidden];
@@ -83,7 +100,7 @@ static CGPoint lastCenterPoint;
         CGFloat scale = MAX(0.7, self.rootView.center.x / centerX);
         self.rootView.transform = CGAffineTransformScale(CGAffineTransformIdentity, scale, scale);
 
-        self.menuView.frame = CGRectMake(self.rootView.frame.size.width, self.rootView.frame.origin.y, self.menuView.frame.size.width,  self.menuView.contentSize.height);
+        self.menuView.frame = gameMenuFrame(self, self.view.bounds, self.rootView.frame.size.width);
         // scale is in range of 0.7-1
         // 1.1 - scale produces in range of 0.4-0.1
         // result in transform scale range of 1-0.25
@@ -113,7 +130,7 @@ static CGPoint lastCenterPoint;
     UIAlertAction* okAction = [UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action) {
         [UIView animateWithDuration:0.4 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
             self.rootView.center = CGPointMake(self.rootView.bounds.size.width/-2, self.rootView.center.y);
-            self.menuView.frame = CGRectMake(self.view.frame.size.width, 0, 0, 0);
+            self.menuView.frame = CGRectMake(self.view.frame.size.width, self.view.safeAreaInsets.top, 0, 0);
         } completion:^(BOOL finished) {
             if (fatalExitGroup == nil) {
                 exit(0);
@@ -217,8 +234,15 @@ static CGPoint lastCenterPoint;
         self.rootView.center = lastCenterPoint = CGPointMake(centerX * self.rootView.transform.a, centerY);
     }
 
-    self.menuView.frame = CGRectMake(self.rootView.frame.size.width, self.rootView.frame.origin.y,
-        frame.size.width*0.3 - 30.0*0.7, self.menuView.contentSize.height);
+    menuSwipeView.frame = gameMenuSwipeFrame(self, frame);
+    UIView *menuSwipeLineView = menuSwipeView.subviews.firstObject;
+    if (menuSwipeLineView != nil) {
+        CGRect lineFrame = menuSwipeLineView.frame;
+        lineFrame.origin.y = MAX(0, (menuSwipeView.bounds.size.height - lineFrame.size.height) / 2.0);
+        menuSwipeLineView.frame = lineFrame;
+    }
+
+    self.menuView.frame = gameMenuFrame(self, frame, self.rootView.frame.size.width);
 }
 
 @end

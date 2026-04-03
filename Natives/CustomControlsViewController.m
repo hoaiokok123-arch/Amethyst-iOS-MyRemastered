@@ -27,6 +27,20 @@
 @implementation CustomControlsViewController
 #define isInGame [self.presentingViewController respondsToSelector:@selector(loadCustomControls)]
 
+- (CGRect)safeAreaNavigationBarFrame {
+    UIEdgeInsets safeInsets = self.view.safeAreaInsets;
+    return CGRectMake(
+        safeInsets.left,
+        safeInsets.top,
+        MAX(0, self.view.bounds.size.width - safeInsets.left - safeInsets.right),
+        44.0
+    );
+}
+
+- (void)updateSafeAreaNavigationBarLayout {
+    self.navigationBar.frame = [self safeAreaNavigationBarFrame];
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -39,7 +53,7 @@
 
     UIEdgeInsets insets = UIApplication.sharedApplication.windows.firstObject.safeAreaInsets;
 
-    UILabel *guideLabel = [[UILabel alloc] initWithFrame:self.view.frame];
+    UILabel *guideLabel = [[UILabel alloc] initWithFrame:self.view.bounds];
     guideLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     guideLabel.numberOfLines = 0;
     guideLabel.textAlignment = NSTextAlignmentCenter;
@@ -47,21 +61,25 @@
     guideLabel.text = localize(@"custom_controls.hint", nil);
     [self.view addSubview:guideLabel]; 
 
-    self.ctrlView = [[ControlLayout alloc] initWithFrame:getSafeArea(self.view.frame)];
+    self.ctrlView = [[ControlLayout alloc] initWithFrame:getSafeArea(self.view.bounds)];
     self.ctrlView.layer.borderColor = UIColor.labelColor.CGColor;
     [self.view addSubview:self.ctrlView];
 
     // Prepare the navigation bar for safe area customization
     UINavigationItem *navigationItem = [[UINavigationItem alloc] init];
-    UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"None", @"Default", @"Custom"]];
+    UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems:@[
+        localize(@"None", nil),
+        localize(@"Default", nil),
+        localize(@"Custom", nil)
+    ]];
     [segmentedControl addTarget:self action:@selector(changeSafeAreaSelection:) forControlEvents:UIControlEventValueChanged];
     [segmentedControl setEnabled:(insets.left+insets.right)>0 forSegmentAtIndex:1];
     [self loadSafeAreaSelectionFor:segmentedControl];
     navigationItem.titleView = segmentedControl;
     navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(actionMenuSafeAreaCancel)];
     navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(actionMenuSafeAreaDone)];
-    self.navigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 44.0)];
-    self.navigationBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    self.navigationBar = [[UINavigationBar alloc] initWithFrame:[self safeAreaNavigationBarFrame]];
+    self.navigationBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     self.navigationBar.hidden = YES;
     self.navigationBar.items = @[navigationItem];
     self.navigationBar.translucent = YES;
@@ -171,8 +189,11 @@
 }
 
 - (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    [self updateSafeAreaNavigationBarLayout];
+
     if (self.navigationBar.hidden) {
-        self.ctrlView.frame = getSafeArea(self.view.frame);
+        self.ctrlView.frame = getSafeArea(self.view.bounds);
     }
 
     // Update dynamic position for each view
@@ -186,13 +207,13 @@
 - (void)changeSafeAreaSelection:(UISegmentedControl *)sender {
     switch (sender.selectedSegmentIndex) {
         case 0:
-            self.ctrlView.frame = self.view.frame;
+            self.ctrlView.frame = self.view.bounds;
             break;
         case 1:
-            self.ctrlView.frame = UIEdgeInsetsInsetRect(self.view.frame, getDefaultSafeArea());
+            self.ctrlView.frame = UIEdgeInsetsInsetRect(self.view.bounds, getDefaultSafeArea());
             break;
         case 2:
-            self.ctrlView.frame = getSafeArea(self.view.frame);
+            self.ctrlView.frame = getSafeArea(self.view.bounds);
             break;
     }
     self.ctrlView.userInteractionEnabled = sender.selectedSegmentIndex == 2;
@@ -203,7 +224,7 @@
     if (CGRectEqualToRect(self.ctrlView.frame, UIScreen.mainScreen.bounds)) {
         control.selectedSegmentIndex = 0;
     } else {
-        control.selectedSegmentIndex = !CGRectEqualToRect(self.ctrlView.frame, UIEdgeInsetsInsetRect(self.view.frame, getDefaultSafeArea())) + 1;
+        control.selectedSegmentIndex = !CGRectEqualToRect(self.ctrlView.frame, UIEdgeInsetsInsetRect(self.view.bounds, getDefaultSafeArea())) + 1;
     }
 }
 
@@ -264,7 +285,7 @@
         message:exit?localize(@"custom_controls.control_menu.exit.warn", nil):@""
         preferredStyle:UIAlertControllerStyleAlert];
     [controller addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"Name";
+        textField.placeholder = localize(@"custom_controls.button_edit.name", nil);
         textField.text = self.currentFileName;
         textField.clearButtonMode = UITextFieldViewModeWhileEditing;
         textField.borderStyle = UITextBorderStyleRoundedRect;
@@ -344,18 +365,18 @@
 }
 
 - (void)actionMenuSafeAreaCancel {
-    self.ctrlView.frame = getSafeArea(self.view.frame);
+    self.ctrlView.frame = getSafeArea(self.view.bounds);
     [self actionMenuSafeArea];
 }
 
 - (void)actionMenuSafeAreaDone {
-    setSafeArea(self.view.frame.size, self.ctrlView.frame);
+    setSafeArea(self.view.bounds.size, self.ctrlView.frame);
     [self actionMenuSafeArea];
 }
 
 - (void)actionMenuAddButtonWithDrawer:(ControlDrawer *)drawer {
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    dict[@"name"] = @"New";
+    dict[@"name"] = localize(@"New", nil);
     dict[@"keycodes"] = @[@0, @0, @0, @0].mutableCopy;
     dict[@"dynamicX"] = @"0";
     dict[@"dynamicY"] = @"0";
@@ -392,7 +413,7 @@
 
 - (void)actionMenuAddDrawer {
     NSMutableDictionary *properties = [[NSMutableDictionary alloc] init];
-    properties[@"name"] = @"New";
+    properties[@"name"] = localize(@"New", nil);
     properties[@"dynamicX"] = @"0";
     properties[@"dynamicY"] = @"0";
     properties[@"width"] = @(50.0);
@@ -706,7 +727,7 @@ CGFloat currentY;
         [self.editSizeWidth addTarget:self action:@selector(textFieldEditingChanged) forControlEvents:UIControlEventEditingChanged];
         [self.editSizeWidth addTarget:self.editSizeWidth action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
         self.editSizeWidth.keyboardType = UIKeyboardTypeDecimalPad;
-        self.editSizeWidth.placeholder = @"width";
+        self.editSizeWidth.placeholder = localize(@"Width", nil);
         self.editSizeWidth.returnKeyType = UIReturnKeyDone;
         self.editSizeWidth.text = [self.targetButton.properties[@"width"] stringValue];
         self.editSizeWidth.textAlignment = NSTextAlignmentCenter;
@@ -715,7 +736,7 @@ CGFloat currentY;
         [self.editSizeHeight addTarget:self action:@selector(textFieldEditingChanged) forControlEvents:UIControlEventEditingChanged];
         [self.editSizeHeight addTarget:self.editSizeHeight action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
         self.editSizeHeight.keyboardType = UIKeyboardTypeDecimalPad;
-        self.editSizeHeight.placeholder = @"height";
+        self.editSizeHeight.placeholder = localize(@"Height", nil);
         self.editSizeHeight.returnKeyType = UIReturnKeyDone;
         self.editSizeHeight.text = [self.targetButton.properties[@"height"] stringValue];
         self.editSizeHeight.textAlignment = NSTextAlignmentCenter;
@@ -727,8 +748,15 @@ CGFloat currentY;
     if ([self.targetButton isKindOfClass:ControlDrawer.class]) {
         // Property: Orientation
         self.arrOrientation = @[@"DOWN", @"LEFT", @"UP", @"RIGHT", @"FREE"];
+        NSArray *orientationTitles = @[
+            localize(@"custom_controls.orientation.down", nil),
+            localize(@"custom_controls.orientation.left", nil),
+            localize(@"custom_controls.orientation.up", nil),
+            localize(@"custom_controls.orientation.right", nil),
+            localize(@"custom_controls.orientation.free", nil)
+        ];
         UILabel *labelOrientation = [self addLabel:localize(@"custom_controls.button_edit.orientation", nil)];
-        self.ctrlOrientation = [[UISegmentedControl alloc] initWithItems:self.arrOrientation];
+        self.ctrlOrientation = [[UISegmentedControl alloc] initWithItems:orientationTitles];
         [self.ctrlOrientation addTarget:self action:@selector(orientationValueChanged:) forControlEvents:UIControlEventValueChanged];
         self.ctrlOrientation.frame = CGRectMake(labelOrientation.frame.size.width + 5.0, currentY - 5.0, width - labelOrientation.frame.size.width - 5.0, 30.0);
         self.ctrlOrientation.selectedSegmentIndex = [self.arrOrientation indexOfObject:

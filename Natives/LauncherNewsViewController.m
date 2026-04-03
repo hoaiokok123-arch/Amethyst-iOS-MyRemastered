@@ -113,7 +113,7 @@
     self.subLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.subLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
     self.subLabel.textColor = [UIColor secondaryLabelColor];
-    self.subLabel.text = @"准备就绪";
+    self.subLabel.text = localize(@"launcher.news.ready", @"Ready");
     [self.contentContainer addSubview:self.subLabel];
     
     // 布局约束
@@ -266,11 +266,11 @@
 - (id)init {
     self = [super init];
     if (self) {
-        self.title = @"主页";
-        self.latestRelease = @"检测中...";
-        self.latestSnapshot = @"检测中...";
+        self.title = localize(@"News", nil);
+        self.latestRelease = localize(@"launcher.news.checking", @"Checking...");
+        self.latestSnapshot = localize(@"launcher.news.checking", @"Checking...");
         self.isLoadingVersions = YES;
-        self.announcementText = @"正在检查更新...";
+        self.announcementText = localize(@"launcher.news.checking_update", @"Checking for updates...");
         self.hasUpdate = NO;
     }
     return self;
@@ -303,8 +303,8 @@
 
 - (void)setupCollectionView {
     UICollectionViewLayout *layout = [self createLayout];
-    self.collectionView = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
-    self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+    self.collectionView.translatesAutoresizingMaskIntoConstraints = NO;
     self.collectionView.backgroundColor = [UIColor clearColor];
     self.collectionView.dataSource = self;
     self.collectionView.delegate = self;
@@ -314,6 +314,12 @@
     [self.collectionView registerClass:[AnnouncementCell class] forCellWithReuseIdentifier:@"AnnouncementCell"];
     
     [self.view addSubview:self.collectionView];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.collectionView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
+        [self.collectionView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
+        [self.collectionView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor],
+        [self.collectionView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor]
+    ]];
 }
 
 - (UICollectionViewLayout *)createLayout {
@@ -390,21 +396,22 @@
     if (indexPath.section == 0) {
         SkinProfileCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"SkinCell" forIndexPath:indexPath];
         
-        cell.welcomeLabel.text = @"欢迎回来";
+        NSString *displayName = self.currentUsername ?: localize(@"launcher.news.player", @"Player");
+        cell.welcomeLabel.text = [NSString stringWithFormat:localize(@"launcher.news.welcome", @"Welcome back, %@"), displayName];
         cell.skinImageView.image = self.currentSkin ?: [UIImage systemImageNamed:@"person.fill"];
-        cell.subLabel.text = @"准备好开始游戏了吗？";
+        cell.subLabel.text = localize(@"launcher.news.subtitle", @"Ready to start the game?");
         
         return cell;
     } else if (indexPath.section == 1) {
         InfoTileCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"InfoCell" forIndexPath:indexPath];
         
         if (indexPath.item == 0) {
-            cell.titleLabel.text = @"最新正式版";
+            cell.titleLabel.text = localize(@"launcher.news.latest_release", @"Latest release");
             cell.valueLabel.text = self.latestRelease;
             cell.iconView.image = [UIImage systemImageNamed:@"cube.box.fill"];
             cell.iconView.tintColor = [UIColor systemGreenColor];
         } else {
-            cell.titleLabel.text = @"最新快照";
+            cell.titleLabel.text = localize(@"launcher.news.latest_snapshot", @"Latest snapshot");
             cell.valueLabel.text = self.latestSnapshot;
             cell.iconView.image = [UIImage systemImageNamed:@"ant.fill"]; // 或者是 hammer.fill
             cell.iconView.tintColor = [UIColor systemOrangeColor];
@@ -418,7 +425,7 @@
         
         if (self.hasUpdate) {
             cell.downloadButton.hidden = NO;
-            [cell.downloadButton setTitle:@"前往下载" forState:UIControlStateNormal];
+            [cell.downloadButton setTitle:localize(@"announcement.download_button", nil) forState:UIControlStateNormal];
             cell.downloadButton.backgroundColor = [UIColor systemBlueColor];
             [cell.downloadButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
             [cell.downloadButton removeTarget:nil action:nil forControlEvents:UIControlEventAllEvents];
@@ -446,16 +453,16 @@
 - (void)updateSkinDisplay {
     BaseAuthenticator *currentAuth = BaseAuthenticator.current;
     
-    if (currentAuth && currentAuth.authData) {
-        NSString *username = currentAuth.authData[@"username"];
-        if (username) {
-            if ([username hasPrefix:@"Demo."]) {
-                username = [username substringFromIndex:5];
+        if (currentAuth && currentAuth.authData) {
+            NSString *username = currentAuth.authData[@"username"];
+            if (username) {
+                if ([username hasPrefix:@"Demo."]) {
+                    username = [username substringFromIndex:5];
+                }
+                self.currentUsername = username;
+            } else {
+                self.currentUsername = localize(@"launcher.news.player", @"Player");
             }
-            self.currentUsername = username;
-        } else {
-            self.currentUsername = @"玩家";
-        }
         
         NSString *uuid = currentAuth.authData[@"uuid"];
         if (uuid) {
@@ -464,7 +471,7 @@
             [self loadDefaultSkin];
         }
     } else {
-        self.currentUsername = @"未登录";
+        self.currentUsername = localize(@"launcher.news.not_signed_in", @"Not signed in");
         [self loadDefaultSkin];
     }
     
@@ -497,7 +504,7 @@
     NSString *steveSkinURL = @"http://111.170.35.224:3000/renders/body/8667ba71b85a4004af54457a9734eed7?overlay";
     
     // 如果当前已经是默认皮肤，避免重复加载 (简单判断 image 是否为空)
-    if (self.currentSkin != nil && [self.currentUsername isEqualToString:@"未登录"]) {
+    if (self.currentSkin != nil && [self.currentUsername isEqualToString:localize(@"launcher.news.not_signed_in", @"Not signed in")]) {
          // Maybe check logic, but re-loading is safer
     }
     
@@ -524,8 +531,8 @@
         // Already loading or initial state
     }
     self.isLoadingVersions = YES;
-    self.latestRelease = @"检测中...";
-    self.latestSnapshot = @"检测中...";
+    self.latestRelease = localize(@"launcher.news.checking", @"Checking...");
+    self.latestSnapshot = localize(@"launcher.news.checking", @"Checking...");
     [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:1]];
     
     NSString *downloadSource = getPrefObject(@"general.download_source");
@@ -547,15 +554,15 @@
                 NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
                 if (json) {
                     NSDictionary *latest = json[@"latest"];
-                    self.latestRelease = latest[@"release"] ?: @"未知";
-                    self.latestSnapshot = latest[@"snapshot"] ?: @"未知";
+                    self.latestRelease = latest[@"release"] ?: localize(@"launcher.news.unknown", @"Unknown");
+                    self.latestSnapshot = latest[@"snapshot"] ?: localize(@"launcher.news.unknown", @"Unknown");
                 } else {
-                    self.latestRelease = @"检测失败";
-                    self.latestSnapshot = @"检测失败";
+                    self.latestRelease = localize(@"launcher.news.check_failed", @"Check failed");
+                    self.latestSnapshot = localize(@"launcher.news.check_failed", @"Check failed");
                 }
             } else {
-                self.latestRelease = @"网络错误";
-                self.latestSnapshot = @"网络错误";
+                self.latestRelease = localize(@"launcher.news.network_error", @"Network error");
+                self.latestSnapshot = localize(@"launcher.news.network_error", @"Network error");
             }
             [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:1]];
         });
@@ -570,7 +577,7 @@
     
     // 检查是否是预览版
     if ([currentVersion rangeOfString:@"Preview" options:NSCaseInsensitiveSearch].location != NSNotFound) {
-        self.announcementText = @"欢迎使用 Amethyst iOS Remastered 测试版！";
+        self.announcementText = localize(@"announcement.preview_version", nil);
         self.hasUpdate = NO;
         [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:2]];
         return;
@@ -583,7 +590,7 @@
     NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error || ((NSHTTPURLResponse *)response).statusCode != 200 || !data) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.announcementText = @"欢迎使用 Amethyst iOS Remastered！";
+                self.announcementText = localize(@"announcement.latest_version", nil);
                 self.hasUpdate = NO;
                 [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:2]];
             });
@@ -595,7 +602,7 @@
         
         if (!latestVersion) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.announcementText = @"欢迎使用 Amethyst iOS Remastered！";
+                self.announcementText = localize(@"announcement.latest_version", nil);
                 self.hasUpdate = NO;
                 [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:2]];
             });
@@ -610,11 +617,11 @@
             NSComparisonResult versionComparison = [self compareVersion:currentVersion withVersion:latestVersion];
             
             if (versionComparison == NSOrderedAscending) {
-                self.announcementText = [NSString stringWithFormat:@"发现新版本：v%@", latestVersion];
+                self.announcementText = [NSString stringWithFormat:localize(@"announcement.new_version_available", nil), latestVersion];
                 self.latestVersion = latestVersion;
                 self.hasUpdate = YES;
             } else {
-                self.announcementText = @"欢迎使用 Amethyst iOS Remastered！当前已是最新版本。";
+                self.announcementText = localize(@"announcement.latest_version", nil);
                 self.hasUpdate = NO;
             }
             [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:2]];

@@ -13,6 +13,18 @@ static BOOL fatalErrorOccurred;
 static NSMutableArray* logLines;
 static PLLogOutputView* current;
 
+- (void)updateSafeAreaLayout {
+    UIEdgeInsets safeInsets = self.safeAreaInsets;
+    CGRect safeBounds = UIEdgeInsetsInsetRect(self.bounds, UIEdgeInsetsMake(0, safeInsets.left, 0, safeInsets.right));
+
+    self.navigationBar.frame = CGRectMake(CGRectGetMinX(safeBounds), safeInsets.top, CGRectGetWidth(safeBounds), 44.0);
+    self.logTableView.frame = safeBounds;
+
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(CGRectGetMaxY(self.navigationBar.frame), 0, safeInsets.bottom, 0);
+    self.logTableView.contentInset = contentInsets;
+    self.logTableView.scrollIndicatorInsets = contentInsets;
+}
+
 - (instancetype)initWithFrame:(CGRect)frame {
     frame.origin.y = frame.size.height;
     self = [super initWithFrame:frame];
@@ -29,17 +41,15 @@ static PLLogOutputView* current;
         [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash
             target:self action:@selector(actionClearLogOutput)]
     ];
-    self.navigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 44)];
+    self.navigationBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 44)];
     self.navigationBar.items = @[navigationItem];
     self.navigationBar.topItem.title = localize(@"game.menu.log_output", nil);
-    [self.navigationBar sizeToFit];
     self.navigationBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 
-    self.logTableView = [[UITableView alloc] initWithFrame:frame];
+    self.logTableView = [[UITableView alloc] initWithFrame:self.bounds];
     //self.logTableView.allowsSelection = NO;
     self.logTableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     self.logTableView.backgroundColor = UIColor.clearColor;
-    self.logTableView.contentInset = UIEdgeInsetsMake(self.navigationBar.frame.size.height, 0, 0, 0);
     self.logTableView.dataSource = self;
     self.logTableView.delegate = self;
     self.logTableView.layoutMargins = UIEdgeInsetsZero;
@@ -51,9 +61,15 @@ static PLLogOutputView* current;
 
     canAppendToLog = YES;
     [self actionStartStopLogOutput];
+    [self updateSafeAreaLayout];
 
     current = self;
     return self;
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    [self updateSafeAreaLayout];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {

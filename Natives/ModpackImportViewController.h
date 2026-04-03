@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ModpackImportViewController : UIViewController
 
 @property (nonatomic, copy, nullable) NSString *profileName;
+@property (nonatomic, assign) BOOL opensImporterOnAppear;
 
 @end
 

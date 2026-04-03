@@ -19,6 +19,7 @@
 #import "installer/ModpackInstallViewController.h"
 #import "ModpackImportViewController.h"
 #import "ModpackImportService.h"
+#import "utils.h"
 #import <QuartzCore/QuartzCore.h>
 
 #include <sys/time.h>
@@ -1092,6 +1093,10 @@
 - (NSString *)displayNameForModpackLoader:(NSString *)loaderIdentifier;
 - (void)registerInstalledModpack:(NSDictionary *)modpack version:(ModVersion *)version modpackDir:(NSString *)modpackDir;
 - (void)showModpackInstallSuccessForName:(NSString *)modpackName profileName:(NSString *)profileName;
+- (void)updateNavigationItemsForSelectedTab;
+- (void)openDownloadedModpacks;
+- (void)openLocalModpackImportView;
+- (void)openImportModpackViewWithAutoImport:(BOOL)autoImport;
 - (void)installModpackFromFile:(NSString *)filePath modpack:(NSDictionary *)modpack version:(ModVersion *)version;
 
 @end
@@ -1339,6 +1344,7 @@
     self.modTableView.hidden = (index != 1);
     self.shaderTableView.hidden = (index != 2);
     self.modpackTableView.hidden = (index != 3);
+    [self updateNavigationItemsForSelectedTab];
     
     if (index == 1) {
         self.searchBar.placeholder = @"Tìm mod...";
@@ -1681,12 +1687,12 @@
         [alert addAction:[UIAlertAction actionWithTitle:@"Modpack đã tải"
                                                   style:UIAlertActionStyleDefault
                                                 handler:^(UIAlertAction * _Nonnull action) {
-            [self openImportModpackView];
+            [self openDownloadedModpacks];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"Nhập modpack cục bộ"
                                                   style:UIAlertActionStyleDefault
                                                 handler:^(UIAlertAction * _Nonnull action) {
-            [self openImportModpackView];
+            [self openLocalModpackImportView];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"Chọn phiên bản game"
                                                   style:UIAlertActionStyleDefault
@@ -2412,7 +2418,31 @@
 #pragma mark - Modpack Installation
 
 - (void)openImportModpackView {
+    [self openImportModpackViewWithAutoImport:NO];
+}
+
+- (void)updateNavigationItemsForSelectedTab {
+    if (self.tabSegment.selectedSegmentIndex == 3) {
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:localize(@"modpack.library.nav_button", nil)
+                                                                                  style:UIBarButtonItemStylePlain
+                                                                                 target:self
+                                                                                 action:@selector(openDownloadedModpacks)];
+    } else {
+        self.navigationItem.rightBarButtonItem = nil;
+    }
+}
+
+- (void)openDownloadedModpacks {
+    [self openImportModpackViewWithAutoImport:NO];
+}
+
+- (void)openLocalModpackImportView {
+    [self openImportModpackViewWithAutoImport:YES];
+}
+
+- (void)openImportModpackViewWithAutoImport:(BOOL)autoImport {
     ModpackImportViewController *importVC = [[ModpackImportViewController alloc] init];
+    importVC.opensImporterOnAppear = autoImport;
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:importVC];
     nav.modalPresentationStyle = UIModalPresentationFormSheet;
     [self presentViewController:nav animated:YES completion:nil];
@@ -2465,10 +2495,10 @@
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cài đặt thành công"
                                                                    message:message
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Mở danh sách modpack"
+    [alert addAction:[UIAlertAction actionWithTitle:localize(@"modpack.library.open_button", nil)
                                               style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction * _Nonnull action) {
-        [self openImportModpackView];
+        [self openDownloadedModpacks];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];

@@ -116,7 +116,7 @@
 "Settings" = "Thiết lập";
 
 "preference.section.general" = "Cài đặt chung";
-"preference.section.video" = "Cài đặt hình ảnh";
+"preference.section.video" = "Cài đặt video và âm thanh";
 "preference.section.footer.video" = "Trình kết xuất tự động cho phép Amethyst chọn tùy chọn tốt nhất dựa trên phiên bản Minecraft. Giảm độ phân giải làm giảm khối lượng công việc GPU để có hiệu suất tốt hơn.";
 "preference.section.control" = "Tuỳ chỉnh bộ điều khiển";
 "preference.section.debug" = "Cài đặt gỡ lỗi UI";
@@ -137,7 +137,7 @@
 "preference.detail.cosmetica" = "Sử dụng áo choàng từ dịch vụ Cosmetica (trước đây là Arc). Để biết thêm thông tin, truy cập https://cosmetica.cc. Yêu cầu có OptiFine";
 "preference.title.debug_logging" = "Ghi lại thông tin gỡ lỗi";
 "preference.detail.debug_logging" = "Ghi lại những cài đặt và hoạt động vào tệp latestlog.txt. Nó có thể giúp các nhà phát triển phát hiện ra lỗi dễ dàng hơn, nhưng Minecraft có thể chạy chậm hơn vì nhật kí được ghi lại thường xuyên hơn.";
-"preference.title.jitstreamer_server" = "IP server JITStreamer";
+"preference.title.jitstreamer_server" = "IP máy chủ JITStreamer";
 "preference.detail.jitstreamer_server" = "Cho phép thay đổi địa chỉ IP của máy chủ JitStreamer với những máy chủ tự do. Bỏ qua tùy chọn này nếu bạn sử dụng máy chủ JitStreamer mặc định.";
 "preference.title.enable_altkit" = "Bật tích hợp AltKit";
 "preference.detail.enable_altkit" = "Khi được bật, Amethyst sẽ cố gắng kết nối với Máy chủ thay thế cục bộ để bật JIT.";
@@ -194,8 +194,8 @@
 "preference.detail.hardware_hide" = "Bật hành vi tự động tắt lớp phủ điều khiển trên màn hình khi chuột hoặc bộ điều khiển trò chơi được kết nối.";
 "preference.title.recording_hide" = "Ẩn điều khiển khỏi quay màn hình";
 "preference.detail.recording_hide" = "Ẩn điều khiển khỏi ảnh chụp màn hình và quay màn hình trong khi chúng vẫn hiện trên thiết bị.";
-"preference.title.gesture_mouse" = "Mouse gestures";
-"preference.detail.gesture_mouse" = "Bật các cử chỉ, chẳng hạn như nhấn để đặt khối, giữ để phá khối, cuộn bằng 2";
+"preference.title.gesture_mouse" = "Cử chỉ chuột";
+"preference.detail.gesture_mouse" = "Bật các cử chỉ như chạm để đặt khối, giữ để phá khối và cuộn bằng hai ngón.";
 "preference.title.gesture_hotbar" = "Cử Chỉ Hotbar";
 "preference.detail.gesture_hotbar" = "Cho phép các cử chỉ, chẳng hạn như chạm vào khe thanh nóng, trao đổi vật phẩm giữa các tay, ném vật phẩm";
 "preference.title.disable_haptics" = "Tắt rung điều khiển";
@@ -492,11 +492,11 @@
 "mods.action.download" = "Tải xuống";
 "mods.filter.all" = "Tất cả";
 "mods.filter.game.loading" = "Phiên bản game: Đang tải...";
-"mods.filter.loader.loading" = "Loader: Đang tải...";
+"mods.filter.loader.loading" = "Bộ nạp mod: Đang tải...";
 "mods.filter.game.menu_title" = "Chọn phiên bản game";
-"mods.filter.loader.menu_title" = "Chọn loader";
+"mods.filter.loader.menu_title" = "Chọn bộ nạp mod";
 "mods.filter.game.current" = "Phiên bản game: %@";
-"mods.filter.loader.current" = "Loader: %@";
+"mods.filter.loader.current" = "Bộ nạp mod: %@";
 "mods.version.unknown_date" = "Không rõ ngày";
 "mods.version.unknown_size" = "Không rõ kích thước";
 
@@ -640,3 +640,29 @@
 "version_manager.select_profile_first" = "Hãy chọn một hồ sơ trước";
 "version_manager.title" = "Quản lý phiên chơi";
 "version_manager.unknown_version" = "Không rõ phiên bản";
+
+"modpack.library.title" = "Modpack đã tải";
+"modpack.library.nav_button" = "Đã tải";
+"modpack.library.open_button" = "Mở modpack đã tải";
+"modpack.library.import_button" = "Nhập modpack cục bộ";
+"modpack.library.empty" = "Chưa có modpack nào.\nHãy tải ở tab modpack hoặc nhập tệp cục bộ.";
+"modpack.library.unknown" = "Không rõ";
+"modpack.library.invalid_file.title" = "Tệp không hợp lệ";
+"modpack.library.invalid_file.message" = "Hãy chọn tệp .mrpack hoặc .zip.";
+"modpack.library.access_denied.title" = "Bị từ chối truy cập";
+"modpack.library.access_denied.message" = "Không thể truy cập tệp đã chọn.";
+"modpack.library.parse_failed.title" = "Phân tích thất bại";
+"modpack.library.parse_failed.message" = "Không thể đọc dữ liệu modpack.";
+"modpack.library.confirm.title" = "Nhập modpack";
+"modpack.library.confirm.message" = "Tên: %@\nPhiên bản: %@\nMinecraft: %@\nLoader: %@ %@\n\nBạn có muốn nhập modpack này không?";
+"modpack.library.confirm.action" = "Nhập";
+"modpack.library.import.success.title" = "Nhập thành công";
+"modpack.library.import.success.message" = "Modpack \"%@\" đã được nhập thành công.";
+"modpack.library.import.failure.title" = "Nhập thất bại";
+"modpack.library.action.launch" = "Chạy modpack";
+"modpack.library.launch.selected.title" = "Đã chọn hồ sơ";
+"modpack.library.launch.selected.message" = "Đã chuyển sang hồ sơ modpack: %@";
+"modpack.library.launch.missing_profile" = "Không tìm thấy hồ sơ modpack.";
+"modpack.library.delete.confirm.title" = "Xác nhận xóa";
+"modpack.library.delete.confirm.message" = "Xóa modpack \"%@\"? Thao tác này không thể hoàn tác.";
+"modpack.library.delete.failure.title" = "Xóa thất bại";

@@ -10,6 +10,7 @@
 #import "ShaderService.h"
 #import "ShaderItem.h"
 #import "installer/modpack/ModrinthAPI.h"
+#import "utils.h"
 
 @interface ShadersManagerViewController () <UITableViewDataSource, UITableViewDelegate, ShaderTableViewCellDelegate, UISearchBarDelegate, ShaderVersionViewControllerDelegate>
 

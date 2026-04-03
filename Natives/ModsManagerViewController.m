@@ -3,6 +3,7 @@
 #import "ModService.h"
 #import "ModItem.h"
 #import "installer/modpack/ModrinthAPI.h"
+#import "utils.h"
 
 @interface ModsManagerViewController () <UITableViewDataSource, UITableViewDelegate, ModTableViewCellDelegate, UISearchBarDelegate, ModVersionViewControllerDelegate>
 

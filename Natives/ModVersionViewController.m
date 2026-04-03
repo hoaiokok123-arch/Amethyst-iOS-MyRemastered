@@ -2,6 +2,7 @@
 #import "installer/modpack/ModrinthAPI.h"
 #import "ModVersion.h"
 #import "ModVersionTableViewCell.h"
+#import "utils.h"
 
 @interface ModVersionViewController () <UITableViewDataSource, UITableViewDelegate>
 

@@ -8,6 +8,7 @@
 #import "BackgroundSettingsViewController.h"
 #import "BackgroundManager.h"
 #import "ImageCropperViewController.h"
+#import "utils.h"
 
 @interface BackgroundSettingsViewController ()
 @property (nonatomic, strong) NSArray<NSArray *> *sections;

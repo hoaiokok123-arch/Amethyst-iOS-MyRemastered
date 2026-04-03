@@ -16,6 +16,9 @@
 
 #import "ImageCropperViewController.h"
 #import "CustomIconManager.h"
+#import "BackgroundSettingsViewController.h"
+#import "BackgroundManager.h"
+#import "AIFixViewController.h"
 
 @interface LauncherPreferencesViewController()
 @property(nonatomic) NSArray<NSString*> *rendererKeys, *rendererList;
@@ -80,7 +83,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             UIImage *selectedImage = info[UIImagePickerControllerOriginalImage];
             if (!selectedImage) {
-                [self showCustomIconError:localize(@"preference.custom_icon.error.get_selected_image", nil)];
+                [self showCustomIconError:@"无法获取选中的图片"];
                 return;
             }
             if (self.pickingMousePointer) {
@@ -91,9 +94,9 @@
                 BOOL ok = [pngData writeToFile:path atomically:YES];
                 if (ok) {
                     [NSNotificationCenter.defaultCenter postNotificationName:@"MousePointerUpdated" object:nil];
-                    [self showSuccessMessage:localize(@"preference.mouse_pointer.updated", nil)];
+                    [self showSuccessMessage:@"鼠标指针已更新"];
                 } else {
-                    [self showCustomIconError:localize(@"preference.mouse_pointer.save_failed", nil)];
+                    [self showCustomIconError:@"保存鼠标指针失败"];
                 }
                 return;
             }
@@ -111,18 +114,18 @@
                         [[CustomIconManager sharedManager] saveCustomIcon:croppedImage withCompletion:^(BOOL success, NSError * _Nullable error) {
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 if (success) {
-                                    [weakSelf showSuccessMessage:localize(@"preference.custom_icon.saved", nil)];
+                                    [weakSelf showSuccessMessage:@"图片已保存，您可以在应用图标设置中选择自定义图标"];
                                     // 更新应用图标选择器的显示
                                     [weakSelf.tableView reloadData];
                                 } else {
-                                    NSString *errorMessage = error.localizedDescription ?: localize(@"preference.custom_icon.save_failed", nil);
+                                    NSString *errorMessage = error.localizedDescription ?: @"保存自定义图标失败";
                                     [weakSelf showCustomIconError:errorMessage];
                                 }
                             });
                         }];
                     } else {
                         dispatch_async(dispatch_get_main_queue(), ^{
-                            [weakSelf showCustomIconError:localize(@"preference.custom_icon.crop_cancelled", nil)];
+                            [weakSelf showCustomIconError:@"图片裁剪已取消"];
                         });
                     }
                 };
@@ -132,11 +135,11 @@
                 [[CustomIconManager sharedManager] saveCustomIcon:selectedImage withCompletion:^(BOOL success, NSError * _Nullable error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         if (success) {
-                            [self showSuccessMessage:localize(@"preference.custom_icon.saved", nil)];
+                            [self showSuccessMessage:@"图片已保存，您可以在应用图标设置中选择自定义图标"];
                             // 更新应用图标选择器的显示
                             [self.tableView reloadData];
                         } else {
-                            NSString *errorMessage = error.localizedDescription ?: localize(@"preference.custom_icon.save_failed", nil);
+                            NSString *errorMessage = error.localizedDescription ?: @"保存自定义图标失败";
                             [self showCustomIconError:errorMessage];
                         }
                     });
@@ -152,7 +155,7 @@
             if (self.pickingMousePointer) {
                 self.pickingMousePointer = NO;
             } else {
-                [self showCustomIconError:localize(@"preference.custom_icon.selection_cancelled", nil)];
+                [self showCustomIconError:@"图片选择已取消"];
             }
         });
     }];
@@ -161,7 +164,7 @@
 #pragma mark - Custom Icon Helper Methods
 
 - (void)showProcessingIndicator {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Processing", nil) message:localize(@"preference.custom_icon.processing_message", nil) preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"处理中" message:@"正在处理您选择的图片..." preferredStyle:UIAlertControllerStyleAlert];
     [self presentViewController:alert animated:YES completion:nil];
     
     // 2秒后自动关闭提示
@@ -171,15 +174,15 @@
 }
 
 - (void)showSuccessMessage:(NSString *)message {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Success", nil) message:message preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"成功" message:message preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
     [alert addAction:okAction];
     [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)showCustomIconError:(NSString *)errorMessage {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Error", nil) message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"错误" message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
     [alert addAction:okAction];
     [self presentViewController:alert animated:YES completion:nil];
 }
@@ -203,8 +206,10 @@
     self.rendererKeys = getRendererKeys(NO);
     self.rendererList = getRendererNames(NO);
     
+    // 检查是否在游戏中：如果当前可见视图控制器是 SurfaceViewController，则在游戏中
     BOOL(^whenNotInGame)() = ^BOOL(){
-        return self.navigationController != nil;
+        UIViewController *visibleVC = currentVC();
+        return ![visibleVC isKindOfClass:NSClassFromString(@"SurfaceViewController")];
     };
 
     // --- 定义弹窗显示的 Block，防止循环引用使用 weakSelf ---
@@ -272,9 +277,7 @@
               @"hasDetail": @YES,
               @"icon": @"paintbrush",
               @"type": self.typePickField,
-              @"enableCondition": ^BOOL(){
-                  return NO;
-              },
+              @"enableCondition": whenNotInGame,
               @"action": ^void(NSString *iconName) {
                   if ([iconName isEqualToString:@"AppIcon-Light"]) {
                       iconName = nil;
@@ -282,8 +285,8 @@
                   } else if ([iconName isEqualToString:@"CustomIcon"]) {
                       if (![[CustomIconManager sharedManager] hasCustomIcon]) {
                           dispatch_async(dispatch_get_main_queue(), ^{
-                              UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"Notice", nil) message:localize(@"preference.custom_icon.setup_required", nil) preferredStyle:UIAlertControllerStyleAlert];
-                              UIAlertAction *okAction = [UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil];
+                              UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"请先设置自定义应用图标：设置 > 自定义应用图标" preferredStyle:UIAlertControllerStyleAlert];
+                              UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
                               [alert addAction:okAction];
                               [self presentViewController:alert animated:YES completion:nil];
                           });
@@ -328,6 +331,18 @@
                   [self openImagePicker];
               }
             },
+            @{@"key": @"launcher_background",
+              @"hasDetail": @YES,
+              @"icon": @"photo.fill.on.rectangle.fill",
+              @"type": self.typeButton,
+              @"enableCondition": whenNotInGame,
+              @"action": ^void(){
+                  BackgroundSettingsViewController *bgVC = [[BackgroundSettingsViewController alloc] init];
+                  UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:bgVC];
+                  nav.modalPresentationStyle = UIModalPresentationFormSheet;
+                  [self presentViewController:nav animated:YES completion:nil];
+              }
+            },
             @{@"key": @"hidden_sidebar",
               @"hasDetail": @YES,
               @"icon": @"sidebar.leading",
@@ -367,6 +382,31 @@
               @"action": ^void(){
                   loadPreferences(YES);
                   [self.tableView reloadData];
+              }
+            },
+            @{@"key": @"ai_crash_fix",
+              @"hasDetail": @YES,
+              @"icon": @"cpu",
+              @"type": self.typeButton,
+              @"enableCondition": whenNotInGame,
+              @"action": ^void(){
+                  AIFixViewController *aiFixVC = [[AIFixViewController alloc] initForSettings];
+                  aiFixVC.modalPresentationStyle = UIModalPresentationOverFullScreen;
+                  
+                  aiFixVC.view.alpha = 0;
+                  aiFixVC.view.transform = CGAffineTransformMakeScale(0.9, 0.9);
+                  
+                  [self presentViewController:aiFixVC animated:NO completion:^{
+                      [UIView animateWithDuration:0.4 
+                                            delay:0 
+                           usingSpringWithDamping:0.8 
+                            initialSpringVelocity:0.5 
+                                          options:UIViewAnimationOptionCurveEaseOut 
+                                       animations:^{
+                          aiFixVC.view.alpha = 1;
+                          aiFixVC.view.transform = CGAffineTransformIdentity;
+                      } completion:nil];
+                  }];
               }
             },
             @{@"key": @"erase_demo_data",
@@ -498,7 +538,7 @@
                     NSString *path = [NSString stringWithFormat:@"%s/controlmap/mouse_pointer.png", getenv("POJAV_HOME")];
                     [NSFileManager.defaultManager removeItemAtPath:path error:nil];
                     [NSNotificationCenter.defaultCenter postNotificationName:@"MousePointerUpdated" object:nil];
-                    [self showSuccessMessage:localize(@"preference.mouse_pointer.reset", nil)];
+                    [self showSuccessMessage:@"鼠标指针已恢复默认"];
                 }
             },
             @{@"key": @"hardware_hide",
@@ -525,31 +565,36 @@
                   
                   // 2. 构建弹窗
                   NSString *title = localize(@"preference.title.two_finger_keyboard", nil);
-                  NSString *statusKey = isOn ? @"preference.two_finger_keyboard.status.enabled" : @"preference.two_finger_keyboard.status.disabled";
-                  NSString *msg = [NSString stringWithFormat:localize(@"preference.two_finger_keyboard.message", nil), localize(statusKey, nil)];
+                  // 如果没有 localization，设置默认标题
+                  if (!title || [title isEqualToString:@"preference.title.two_finger_keyboard"]) {
+                      title = @"双指呼出键盘";
+                  }
+                  
+                  NSString *statusMsg = isOn ? @"[✓] 当前状态: 已开启 (ON)" : @"[✗] 当前状态: 已关闭 (OFF)";
+                  NSString *msg = [NSString stringWithFormat:@"%@\n\n开启后，在游戏中双指同时长按屏幕可呼出键盘。\n此功能由WeiErLiTeo制作。", statusMsg];
                   
                   UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:msg preferredStyle:UIAlertControllerStyleAlert];
                   
                   // 3. 根据当前状态显示不同的按钮
                   if (!isOn) {
-                      [alert addAction:[UIAlertAction actionWithTitle:localize(@"preference.two_finger_keyboard.action.enable", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                      [alert addAction:[UIAlertAction actionWithTitle:@"开启 (Enable)" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                           // 强制开启
                           setPrefBool(@"control.two_finger_keyboard", YES);
-                          [weakSelf showSuccessMessage:localize(@"preference.two_finger_keyboard.enabled", nil)];
+                          [weakSelf showSuccessMessage:@"双指呼出键盘已开启"];
                           // 刷新界面
                           [weakSelf.tableView reloadData];
                       }]];
                   } else {
-                      [alert addAction:[UIAlertAction actionWithTitle:localize(@"preference.two_finger_keyboard.action.disable", nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+                      [alert addAction:[UIAlertAction actionWithTitle:@"关闭 (Disable)" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
                           // 强制关闭
                           setPrefBool(@"control.two_finger_keyboard", NO);
-                          [weakSelf showSuccessMessage:localize(@"preference.two_finger_keyboard.disabled", nil)];
+                          [weakSelf showSuccessMessage:@"双指呼出键盘已关闭"];
                           // 刷新界面
                           [weakSelf.tableView reloadData];
                       }]];
                   }
                   
-                  [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil) style:UIAlertActionStyleCancel handler:nil]];
+                  [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
                   
                   [weakSelf presentViewController:alert animated:YES completion:nil];
               }
@@ -738,6 +783,18 @@
     ];
 
     [super viewDidLoad];
+    
+    // Apply transparent background if global background is active
+    if ([[BackgroundManager sharedManager] hasBackground]) {
+        self.view.backgroundColor = [UIColor clearColor];
+        self.tableView.backgroundColor = [UIColor clearColor];
+        self.tableView.backgroundView = nil;
+        
+        // Make separator visible on background
+        self.tableView.separatorEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+        self.tableView.separatorColor = [UIColor colorWithWhite:1.0 alpha:0.2];
+    }
+    
     if (self.navigationController == nil) {
         self.tableView.alpha = 0.9;
     }
@@ -746,6 +803,20 @@
         closeButton.frame = CGRectOffset(closeButton.frame, 10, 10);
         [closeButton addTarget:self action:@selector(actionClose) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:closeButton];
+    }
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    // Re-apply transparency when appearing (in case background was just set)
+    if ([[BackgroundManager sharedManager] hasBackground]) {
+        self.view.backgroundColor = [UIColor clearColor];
+        self.tableView.backgroundColor = [UIColor clearColor];
+        self.tableView.backgroundView = nil;
+        
+        // Refresh cells to apply background styling
+        [self.tableView reloadData];
     }
 }
 
@@ -760,13 +831,96 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-#pragma mark UITableView
+#pragma mark - UITableView Data Source Override
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell = [super tableView:tableView cellForRowAtIndexPath:indexPath];
+    
+    // Apply background styling if global background is active
+    if ([[BackgroundManager sharedManager] hasBackground]) {
+        // Set semi-transparent dark background for cells
+        cell.backgroundColor = [UIColor colorWithWhite:0.12 alpha:0.75];
+        
+        // Set white text for better visibility on dark background
+        cell.textLabel.textColor = [UIColor whiteColor];
+        cell.textLabel.shadowColor = [UIColor blackColor];
+        cell.textLabel.shadowOffset = CGSizeMake(0, 1);
+        
+        // Detail text light gray
+        cell.detailTextLabel.textColor = [UIColor colorWithWhite:0.8 alpha:1.0];
+        cell.detailTextLabel.shadowColor = [UIColor blackColor];
+        cell.detailTextLabel.shadowOffset = CGSizeMake(0, 1);
+        
+        // Tint color for icons and accessories
+        cell.tintColor = [UIColor systemBlueColor];
+        
+        // Handle specific cell types
+        NSArray *subviews = cell.contentView.subviews;
+        for (UIView *subview in subviews) {
+            // Style sliders
+            if ([subview isKindOfClass:[UISlider class]]) {
+                UISlider *slider = (UISlider *)subview;
+                slider.tintColor = [UIColor systemBlueColor];
+                slider.thumbTintColor = [UIColor whiteColor];
+            }
+            
+            // Style switches
+            if ([subview isKindOfClass:[UISwitch class]]) {
+                UISwitch *switchControl = (UISwitch *)subview;
+                switchControl.onTintColor = [UIColor systemBlueColor];
+            }
+            
+            // Style text fields
+            if ([subview isKindOfClass:[UITextField class]]) {
+                UITextField *textField = (UITextField *)subview;
+                textField.textColor = [UIColor whiteColor];
+                textField.backgroundColor = [UIColor colorWithWhite:0.2 alpha:0.6];
+                textField.layer.cornerRadius = 6;
+            }
+            
+            // Style labels
+            if ([subview isKindOfClass:[UILabel class]]) {
+                UILabel *label = (UILabel *)subview;
+                label.textColor = [UIColor whiteColor];
+                label.shadowColor = [UIColor blackColor];
+                label.shadowOffset = CGSizeMake(0, 1);
+            }
+        }
+        
+        // Style the picker label if exists
+        if (cell.accessoryView && [cell.accessoryView isKindOfClass:[UILabel class]]) {
+            UILabel *pickerLabel = (UILabel *)cell.accessoryView;
+            pickerLabel.textColor = [UIColor colorWithWhite:0.8 alpha:1.0];
+        }
+    } else {
+        // Reset to default when no background
+        cell.backgroundColor = [UIColor secondarySystemBackgroundColor];
+        cell.textLabel.textColor = [UIColor labelColor];
+        cell.textLabel.shadowColor = nil;
+        cell.textLabel.shadowOffset = CGSizeZero;
+        cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
+        cell.detailTextLabel.shadowColor = nil;
+        cell.detailTextLabel.shadowOffset = CGSizeZero;
+    }
+    
+    return cell;
+}
+
+#pragma mark - UITableView Delegate
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
     if (section == 0) { // Add to general section
-        return [NSString stringWithFormat:@"Amethyst iOS Remastered %@\n%@ on %@ (%s)\nPID: %d",
+        NSString *versionString = [NSString stringWithFormat:@"Amethyst iOS Remastered %@\n%@ on %@ (%s)\nPID: %d",
             NSBundle.mainBundle.infoDictionary[@"CFBundleShortVersionString"],
             UIDevice.currentDevice.completeOSVersion, [HostManager GetModelName], getenv("POJAV_DETECTEDINST"), getpid()];
+        
+        // Style footer for background if needed
+        if ([[BackgroundManager sharedManager] hasBackground]) {
+            // Footer text is handled by the table view, but we can ensure visibility
+            // by making sure the section has appropriate styling
+        }
+        
+        return versionString;
     }
 
     NSString *footer = NSLocalizedStringWithDefaultValue(([NSString stringWithFormat:@"preference.section.footer.%@", self.prefSections[section]]), @"Localizable", NSBundle.mainBundle, @" ", nil);
@@ -774,6 +928,34 @@
         return nil;
     }
     return footer;
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section {
+    // Style section headers for background visibility
+    if ([[BackgroundManager sharedManager] hasBackground]) {
+        if ([view isKindOfClass:[UITableViewHeaderFooterView class]]) {
+            UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
+            header.textLabel.textColor = [UIColor whiteColor];
+            header.textLabel.shadowColor = [UIColor blackColor];
+            header.textLabel.shadowOffset = CGSizeMake(0, 1);
+            header.backgroundView = [[UIView alloc] init];
+            header.backgroundView.backgroundColor = [UIColor clearColor];
+        }
+    }
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayFooterView:(UIView *)view forSection:(NSInteger)section {
+    // Style section footers for background visibility
+    if ([[BackgroundManager sharedManager] hasBackground]) {
+        if ([view isKindOfClass:[UITableViewHeaderFooterView class]]) {
+            UITableViewHeaderFooterView *footer = (UITableViewHeaderFooterView *)view;
+            footer.textLabel.textColor = [UIColor colorWithWhite:0.8 alpha:1.0];
+            footer.textLabel.shadowColor = [UIColor blackColor];
+            footer.textLabel.shadowOffset = CGSizeMake(0, 1);
+            footer.backgroundView = [[UIView alloc] init];
+            footer.backgroundView.backgroundColor = [UIColor clearColor];
+        }
+    }
 }
 
 @end

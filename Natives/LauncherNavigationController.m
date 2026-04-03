@@ -49,7 +49,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     self.versionTextField = [[PickTextField alloc] initWithFrame:CGRectMake(4, 4, self.toolbar.frame.size.width * 0.8 - 8, self.toolbar.frame.size.height - 8)];
     [self.versionTextField addTarget:self.versionTextField action:@selector(resignFirstResponder) forControlEvents:UIControlEventEditingDidEndOnExit];
     self.versionTextField.autoresizingMask = AUTORESIZE_MASKS;
-    self.versionTextField.placeholder = localize(@"preference.placeholder.version", nil);
+    self.versionTextField.placeholder = @"Specify version...";
     self.versionTextField.leftView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 40, 40)];
     self.versionTextField.rightView = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"SpinnerArrow"] _imageWithSize:CGSizeMake(30, 30)]];
     self.versionTextField.rightView.frame = CGRectMake(0, 0, self.versionTextField.frame.size.height * 0.9, self.versionTextField.frame.size.height * 0.9);
@@ -63,6 +63,12 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     UIToolbar *versionPickToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0, 0.0, self.view.frame.size.width, 44.0)];
 
     [self reloadProfileList];
+
+    // 监听配置文件列表刷新通知
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(reloadProfileList)
+                                                 name:@"ReloadProfileList"
+                                               object:nil];
 
     UIBarButtonItem *versionFlexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
     UIBarButtonItem *versionDoneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(versionClosePicker)];
@@ -179,6 +185,11 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     }];
 }
 
+- (void)fetchRemoteVersionListForce:(BOOL)force {
+    // 直接调用 fetchRemoteVersionList，忽略 force 参数
+    [self fetchRemoteVersionList];
+}
+
 // Invoked by: startup, instance change event
 - (void)reloadProfileList {
     // Reload local version list
@@ -194,6 +205,10 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     }
     [self.versionPickerView selectRow:self.profileSelectedAt inComponent:0 animated:NO];
     [self pickerView:self.versionPickerView didSelectRow:self.profileSelectedAt inComponent:0];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - Options
@@ -473,7 +488,8 @@ static void *ProgressObserverContext = &ProgressObserverContext;
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    [sidebarViewController updateAccountInfo];
+    // 发送通知更新账户信息
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"UpdateAccountInfo" object:nil];
 }
 
 @end

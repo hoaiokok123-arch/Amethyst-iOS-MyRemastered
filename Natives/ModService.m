@@ -357,7 +357,7 @@
             newPath = [currentPath substringToIndex:currentPath.length - 9];
         } else {
             // Should not happen, but handle gracefully
-            if (error) *error = [NSError errorWithDomain:@"ModServiceError" code:101 userInfo:@{NSLocalizedDescriptionKey:@"Trạng thái tệp không nhất quán, không thể bật mod."}];
+            if (error) *error = [NSError errorWithDomain:@"ModServiceError" code:101 userInfo:@{NSLocalizedDescriptionKey:@"文件状态不一致，无法启用。"}];
             return NO;
         }
     } else {
@@ -388,7 +388,7 @@
     NSString *modsFolder = [self existingModsFolderForProfile:profileName];
     if (!modsFolder) {
         if (completion) {
-            NSError *error = [NSError errorWithDomain:@"ModServiceError" code:1 userInfo:@{NSLocalizedDescriptionKey:@"Không tìm thấy thư mục Mods."}];
+            NSError *error = [NSError errorWithDomain:@"ModServiceError" code:1 userInfo:@{NSLocalizedDescriptionKey:@"无法找到 Mods 文件夹。"}];
             completion(error);
         }
         return;
@@ -397,7 +397,7 @@
     NSURL *url = [NSURL URLWithString:mod.selectedVersionDownloadURL];
     if (!url) {
         if (completion) {
-            NSError *error = [NSError errorWithDomain:@"ModServiceError" code:2 userInfo:@{NSLocalizedDescriptionKey:@"Liên kết tải xuống không hợp lệ."}];
+            NSError *error = [NSError errorWithDomain:@"ModServiceError" code:2 userInfo:@{NSLocalizedDescriptionKey:@"无效的下载链接。"}];
             completion(error);
         }
         return;

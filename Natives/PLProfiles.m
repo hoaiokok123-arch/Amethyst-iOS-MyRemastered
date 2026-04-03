@@ -87,10 +87,27 @@ static PLProfiles* current;
 - (void)setSelectedProfileName:(NSString *)name {
     self.profileDict[@"selectedProfile"] = (id)name;
     [self save];
+    
+    // 发送版本切换通知
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"SelectedProfileChanged" object:name];
 }
 
 - (void)save {
     saveJSONToFile(self.profileDict, self.profilePath);
+}
+
+// 新增：修复构建错误 - 实现缺失的 saveProfile:withName: 方法
+- (void)saveProfile:(NSMutableDictionary<NSString *, NSString *> *)profile withName:(NSString *)name {
+    // 确保 profiles 字典存在
+    if (!self.profileDict[@"profiles"]) {
+        self.profileDict[@"profiles"] = [NSMutableDictionary dictionary];
+    }
+    
+    // 将配置文件保存到指定名称
+    self.profileDict[@"profiles"][name] = profile;
+    
+    // 保存整个配置文件
+    [self save];
 }
 
 @end

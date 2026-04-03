@@ -296,30 +296,22 @@ jre: native
 	cp $(WORKINGDIR)/libawt_xawt.dylib $(OUTPUTDIR)/java_runtimes/java-21-openjdk/lib
 	echo '[Amethyst v$(VERSION)] jre - end'
 
-# MobileGlues artifact ID (workflow_run id: 22014226012, artifact id: 5510020012)
-MG_ARTIFACT_ID ?= 5510020012
-
 dep_mg:
 	echo '[Amethyst v$(VERSION)] dep_mg - start'
 	mkdir -p $(WORKINGDIR)/mobileglues
-	@if [ -f "$(SOURCEDIR)/mobileglues-artifact/libmobileglues.dylib" ]; then \
-		echo "Using pre-downloaded MobileGlues artifact"; \
-		cp $(SOURCEDIR)/mobileglues-artifact/libmobileglues.dylib $(WORKINGDIR)/libmobileglues.dylib; \
-	elif [ "$(RUNNER)" = "1" ]; then \
-		echo "Error: MobileGlues artifact not found. Ensure the workflow downloads it first."; \
-		exit 1; \
-	else \
-		echo "Downloading MobileGlues artifact (requires GitHub token)..."; \
-		if [ -n "$(GITHUB_TOKEN)" ]; then \
-			curl -L -H "Authorization: token $(GITHUB_TOKEN)" -o /tmp/mg.zip "https://api.github.com/repos/MobileGL-Dev/MobileGlues/actions/artifacts/$(MG_ARTIFACT_ID)/zip"; \
-			cd /tmp && python3 -c "import zipfile; zipfile.ZipFile('mg.zip').extractall('mg_artifact')"; \
-			cp /tmp/mg_artifact/libmobileglues.dylib $(WORKINGDIR)/libmobileglues.dylib; \
-			rm -rf /tmp/mg.zip /tmp/mg_artifact; \
-		else \
-			echo "Error: GITHUB_TOKEN not set. Please set GITHUB_TOKEN or download manually."; \
-			exit 1; \
-		fi; \
-	fi
+	cd $(WORKINGDIR)/mobileglues && cmake \
+		-DMACOS="1" \
+		-DCMAKE_CROSSCOMPILING=true \
+		-DCMAKE_SYSTEM_NAME=Darwin \
+		-DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+		-DCMAKE_OSX_SYSROOT="$(SDKPATH)" \
+		-DCMAKE_OSX_ARCHITECTURES=arm64 \
+		-DCMAKE_OSX_DEPLOYMENT_TARGET=14.0 \
+		-DCMAKE_C_FLAGS="-arch arm64" \
+		$(SOURCEDIR)/Natives/external/MobileGlues/MobileGlues-cpp/
+
+	cmake --build $(WORKINGDIR)/mobileglues --config RelWithDebInfo -j$(JOBS) --target mobileglues
+	cp $(WORKINGDIR)/mobileglues/libmobileglues.dylib $(WORKINGDIR)/libmobileglues.dylib
 	echo '[Amethyst v$(VERSION)] dep_mg - end'
 
 assets:

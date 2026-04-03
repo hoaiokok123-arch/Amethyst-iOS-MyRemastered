@@ -2,7 +2,6 @@
 #import "ModItem.h"
 #import "ModService.h"
 #import <QuartzCore/QuartzCore.h>
-#import "utils.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -42,7 +41,7 @@
         _enableSwitch.translatesAutoresizingMaskIntoConstraints = NO;
         [_enableSwitch addTarget:self action:@selector(toggleTapped) forControlEvents:UIControlEventValueChanged];
 
-        _downloadButton = [self createButtonWithTitle:localize(@"mods.action.download", nil) titleColor:[UIColor whiteColor] action:@selector(downloadTapped)];
+        _downloadButton = [self createButtonWithTitle:@"下载" titleColor:[UIColor whiteColor] action:@selector(downloadTapped)];
         _downloadButton.backgroundColor = [UIColor systemGreenColor];
         _downloadButton.layer.cornerRadius = 10;
         _downloadButton.titleLabel.font = [UIFont boldSystemFontOfSize:10];
@@ -340,7 +339,7 @@
     formatter.numberStyle = NSNumberFormatterDecimalStyle;
     NSString *downloadsStr = [formatter stringFromNumber:mod.downloads ?: @0];
 
-    _statsLabel.text = [NSString stringWithFormat:@"%@ downloads", downloadsStr];
+    _statsLabel.text = [NSString stringWithFormat:@"%@ 下载", downloadsStr];
 }
 
 

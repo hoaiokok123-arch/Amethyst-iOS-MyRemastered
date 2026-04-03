@@ -76,7 +76,10 @@ static BaseAuthenticator *current = nil;
     error = saveJSONToFile(self.authData, newPath);
 
     if (error != nil) {
-        showDialog(localize(@"auth.base.error.saving_file", nil), error.localizedDescription);
+        showDialog(@"Error while saving file", error.localizedDescription);
+    } else {
+        // 保存选中的账户，确保重启后能恢复登录状态
+        setPrefObject(@"internal.selected_account", self.authData[@"username"]);
     }
     return error == nil;
 }

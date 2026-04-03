@@ -1,5 +1,4 @@
 #import "ImageCropperViewController.h"
-#import "utils.h"
 
 @interface ImageCropperViewController ()
 @property (nonatomic, strong) UIImageView *imageView;
@@ -21,7 +20,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.title = localize(@"preference.crop_image", nil);
+    self.title = @"裁剪图片";
     self.view.backgroundColor = [UIColor blackColor];
     
     // 添加导航栏按钮

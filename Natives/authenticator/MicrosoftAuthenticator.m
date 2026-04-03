@@ -217,7 +217,7 @@ typedef void(^XSTSCallback)(NSString *xsts, NSString *uhs);
 - (void)refreshTokenWithCallback:(Callback)callback {
     // Move tokens to keychain if we haven't
     if (!self.tokenData) {
-        showDialog(localize(@"Error", nil), localize(@"auth.microsoft.error.load_keychain", nil));
+        showDialog(localize(@"Error", nil), @"Failed to load account tokens from keychain");
         callback(nil, YES);
         return;
     }
@@ -232,7 +232,7 @@ typedef void(^XSTSCallback)(NSString *xsts, NSString *uhs);
 - (BOOL)saveChanges {
     BOOL savedToKeychain = [self setAccessToken:self.authData[@"accessToken"] refreshToken:self.authData[@"msaRefreshToken"]];
     if (!savedToKeychain) {
-        showDialog(localize(@"Error", nil), localize(@"auth.microsoft.error.save_keychain", nil));
+        showDialog(localize(@"Error", nil), @"Failed to save account tokens to keychain");
         return NO;
     }
     [self.authData removeObjectsForKeys:@[@"accessToken", @"msaRefreshToken"]];

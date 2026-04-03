@@ -20,7 +20,6 @@
 #import "JavaLauncher.h"
 #import "LauncherPreferences.h"
 #import "PLProfiles.h"
-#import "TouchControllerBridge.h"
 
 #define fm NSFileManager.defaultManager
 
@@ -127,8 +126,6 @@ int launchJVM(NSString *username, id launchTarget, int width, int height, int mi
 
     init_loadDefaultEnv();
     init_loadCustomEnv();
-    unsetenv("TOUCH_CONTROLLER_PROXY");
-    unsetenv("TOUCH_CONTROLLER_PROXY_SOCKET");
 
     // --- [更新] TouchController 通信方式支持 ---
     // 检查是否启用了 TouchController 以及选择的通信方式
@@ -139,12 +136,8 @@ int launchJVM(NSString *username, id launchTarget, int width, int height, int mi
             NSLog(@"[JavaLauncher] Enabled TouchController with UDP mode");
         } else if (mode == 2) { // 静态库模式
             // 设置 Unix Domain Socket 路径
-            if ([TouchControllerBridge isTouchControllerAvailable]) {
-                setenv("TOUCH_CONTROLLER_PROXY_SOCKET", "/tmp/touchcontroller.sock", 1);
-                NSLog(@"[JavaLauncher] Enabled TouchController with Static Library mode");
-            } else {
-                NSLog(@"[JavaLauncher] TouchController static library mode requested, but the bridge is unavailable");
-            }
+            setenv("TOUCH_CONTROLLER_PROXY_SOCKET", "/tmp/touchcontroller.sock", 1);
+            NSLog(@"[JavaLauncher] Enabled TouchController with Static Library mode");
         }
     }
     // ------------------------------------------
@@ -216,7 +209,7 @@ int launchJVM(NSString *username, id launchTarget, int width, int height, int mi
     NSLog(@"[JavaLauncher] Max RAM allocation is set to %d MB", allocmem);
     if (!validateVirtualMemorySpace(allocmem)) {
         UIKit_returnToSplitView();
-        showDialog(localize(@"Error", nil), localize(@"java.error.insufficient_memory", nil));
+        showDialog(localize(@"Error", nil), @"Insufficient contiguous virtual memory space. Lower memory allocation and try again.");
         return 1;
     }
 

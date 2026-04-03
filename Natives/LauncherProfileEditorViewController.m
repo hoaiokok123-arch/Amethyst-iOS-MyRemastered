@@ -27,6 +27,26 @@
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(actionClose)];
     self.navigationController.modalInPresentation = YES;
     self.prefSectionsVisible = YES;
+    
+    // 设置半透明背景
+    self.view.backgroundColor = [UIColor colorWithWhite:0.08 alpha:0.7];
+    if (@available(iOS 13.0, *)) {
+        self.tableView.backgroundColor = [UIColor clearColor];
+    } else {
+        self.tableView.backgroundColor = [UIColor colorWithWhite:0.08 alpha:0.7];
+    }
+    
+    // 设置导航栏半透明样式
+    if (@available(iOS 13.0, *)) {
+        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+        [appearance configureWithOpaqueBackground];
+        appearance.backgroundColor = [UIColor colorWithWhite:0.08 alpha:0.9];
+        appearance.titleTextAttributes = @{NSForegroundColorAttributeName: [UIColor labelColor]};
+        self.navigationController.navigationBar.standardAppearance = appearance;
+        self.navigationController.navigationBar.scrollEdgeAppearance = appearance;
+    }
+    self.navigationController.navigationBar.barTintColor = [UIColor colorWithWhite:0.08 alpha:0.9];
+    self.navigationController.navigationBar.tintColor = [UIColor systemBlueColor];
 
     // Setup preference getter and setter
     __weak LauncherProfileEditorViewController *weakSelf = self;
@@ -148,6 +168,27 @@
     ];
 
     [super viewDidLoad];
+    
+    // 监听版本列表刷新通知
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(reloadVersionList)
+                                                 name:@"ReloadProfileList"
+                                               object:nil];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)reloadVersionList {
+    // 清除当前版本列表缓存，下次打开选择器时会重新加载
+    self.versionList = nil;
+    self.versionSelectedAt = -1;
+    
+    // 如果版本选择器正在显示，立即刷新
+    if (self.versionPickerView && self.versionPickerView.window) {
+        [self changeVersionType:nil];
+    }
 }
 
 - (void)actionClose {
@@ -187,11 +228,11 @@
     }
 
     [PLProfiles.current save];
+    
+    // 发送通知刷新配置文件列表
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"SelectedProfileChanged" object:self.profile[@"name"]];
+    
     [self actionClose];
-
-    // Call LauncherProfilesViewController's viewWillAppear
-    UINavigationController *navVC = (id) ((UISplitViewController *)self.presentingViewController).viewControllers[1];
-    [navVC.viewControllers[0] viewWillAppear:NO];
 }
 
 - (BOOL)isPickFieldAtSection:(NSString *)section key:(NSString *)key {

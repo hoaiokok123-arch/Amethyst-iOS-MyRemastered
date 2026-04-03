@@ -211,6 +211,7 @@ typedef NS_ENUM(NSInteger, TouchControllerCommMode) {
             // 禁用 TouchController
             self.setPreference(@"control", @"mod_touch_enable", @NO);
             self.setPreference(@"control", @"mod_touch_mode", @0);
+            [self removeUDPEnvironmentVariable];
             NSLog(@"[TouchController] Disabled");
             break;
 
@@ -218,6 +219,7 @@ typedef NS_ENUM(NSInteger, TouchControllerCommMode) {
             // 启用 UDP 模式
             self.setPreference(@"control", @"mod_touch_enable", @YES);
             self.setPreference(@"control", @"mod_touch_mode", @1);
+            [self setUDPEnvironmentVariable];
             NSLog(@"[TouchController] Enabled with UDP mode");
             break;
 
@@ -225,8 +227,29 @@ typedef NS_ENUM(NSInteger, TouchControllerCommMode) {
             // 启用静态库模式
             self.setPreference(@"control", @"mod_touch_enable", @YES);
             self.setPreference(@"control", @"mod_touch_mode", @2);
+            [self removeUDPEnvironmentVariable];
             NSLog(@"[TouchController] Enabled with Static Library mode");
             break;
+    }
+}
+
+- (void)setUDPEnvironmentVariable {
+    NSString *currentEnv = getPrefObject(@"java.env_variables");
+    if ([currentEnv isKindOfClass:[NSString class]]) {
+        if (![currentEnv containsString:@"TOUCH_CONTROLLER_PROXY=12450"]) {
+            NSString *newEnv = [currentEnv stringByAppendingString:@" TOUCH_CONTROLLER_PROXY=12450"];
+            setPrefObject(@"java.env_variables", newEnv);
+        }
+    } else {
+        setPrefObject(@"java.env_variables", @"TOUCH_CONTROLLER_PROXY=12450");
+    }
+}
+
+- (void)removeUDPEnvironmentVariable {
+    NSString *currentEnv = getPrefObject(@"java.env_variables");
+    if ([currentEnv isKindOfClass:[NSString class]]) {
+        NSString *newEnv = [currentEnv stringByReplacingOccurrencesOfString:@" TOUCH_CONTROLLER_PROXY=12450" withString:@""];
+        setPrefObject(@"java.env_variables", newEnv);
     }
 }
 

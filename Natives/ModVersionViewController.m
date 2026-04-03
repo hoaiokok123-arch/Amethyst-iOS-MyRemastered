@@ -2,7 +2,6 @@
 #import "installer/modpack/ModrinthAPI.h"
 #import "ModVersion.h"
 #import "ModVersionTableViewCell.h"
-#import "utils.h"
 
 @interface ModVersionViewController () <UITableViewDataSource, UITableViewDelegate>
 
@@ -36,8 +35,8 @@
 }
 
 - (void)setupFilterControls {
-    self.gameVersionFilterButton = [self createFilterButtonWithTitle:localize(@"mods.filter.game.loading", nil)];
-    self.loaderFilterButton = [self createFilterButtonWithTitle:localize(@"mods.filter.loader.loading", nil)];
+    self.gameVersionFilterButton = [self createFilterButtonWithTitle:@"游戏版本: 加载中..."];
+    self.loaderFilterButton = [self createFilterButtonWithTitle:@"加载器: 加载中..."];
 
     UIStackView *filterStackView = [[UIStackView alloc] initWithArrangedSubviews:@[self.gameVersionFilterButton, self.loaderFilterButton]];
     filterStackView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -113,9 +112,8 @@
 }
 
 - (void)processFilters {
-    NSString *allOption = localize(@"mods.filter.all", nil);
-    NSMutableSet<NSString *> *gameVersions = [NSMutableSet setWithObject:allOption];
-    NSMutableSet<NSString *> *loaders = [NSMutableSet setWithObject:allOption];
+    NSMutableSet<NSString *> *gameVersions = [NSMutableSet setWithObject:@"全部"];
+    NSMutableSet<NSString *> *loaders = [NSMutableSet setWithObject:@"全部"];
 
     for (ModVersion *version in self.allVersions) {
         for (NSString *gameVersion in version.gameVersions) {
@@ -128,8 +126,8 @@
 
     // Sort game versions with semantic versioning
     self.availableGameVersions = [[gameVersions allObjects] sortedArrayUsingComparator:^NSComparisonResult(NSString *obj1, NSString *obj2) {
-        if ([obj1 isEqualToString:allOption]) return NSOrderedAscending;
-        if ([obj2 isEqualToString:allOption]) return NSOrderedDescending;
+        if ([obj1 isEqualToString:@"全部"]) return NSOrderedAscending;
+        if ([obj2 isEqualToString:@"全部"]) return NSOrderedDescending;
         return [obj2 compare:obj1 options:NSNumericSearch];
     }];
 
@@ -155,8 +153,8 @@
         }
         [gameVersionActions addObject:action];
     }
-    self.gameVersionFilterButton.menu = [UIMenu menuWithTitle:localize(@"mods.filter.game.menu_title", nil) children:gameVersionActions];
-    [self.gameVersionFilterButton setTitle:[NSString stringWithFormat:localize(@"mods.filter.game.current", nil), self.selectedGameVersion] forState:UIControlStateNormal];
+    self.gameVersionFilterButton.menu = [UIMenu menuWithTitle:@"选择游戏版本" children:gameVersionActions];
+    [self.gameVersionFilterButton setTitle:[NSString stringWithFormat:@"游戏版本: %@", self.selectedGameVersion] forState:UIControlStateNormal];
 
     // Loader Button Menu
     NSMutableArray<UIAction *> *loaderActions = [NSMutableArray array];
@@ -171,8 +169,8 @@
         }
         [loaderActions addObject:action];
     }
-    self.loaderFilterButton.menu = [UIMenu menuWithTitle:localize(@"mods.filter.loader.menu_title", nil) children:loaderActions];
-    [self.loaderFilterButton setTitle:[NSString stringWithFormat:localize(@"mods.filter.loader.current", nil), self.selectedLoader] forState:UIControlStateNormal];
+    self.loaderFilterButton.menu = [UIMenu menuWithTitle:@"选择加载器" children:loaderActions];
+    [self.loaderFilterButton setTitle:[NSString stringWithFormat:@"加载器: %@", self.selectedLoader] forState:UIControlStateNormal];
 }
 
 - (void)filterChanged {
@@ -181,10 +179,9 @@
 }
 
 - (void)filterAndReload {
-    NSString *allOption = localize(@"mods.filter.all", nil);
     NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(ModVersion *evaluatedObject, NSDictionary *bindings) {
-        BOOL gameVersionMatch = [self.selectedGameVersion isEqualToString:allOption] || [evaluatedObject.gameVersions containsObject:self.selectedGameVersion];
-        BOOL loaderMatch = [self.selectedLoader isEqualToString:allOption] || [evaluatedObject.loaders containsObject:self.selectedLoader.lowercaseString];
+        BOOL gameVersionMatch = [self.selectedGameVersion isEqualToString:@"全部"] || [evaluatedObject.gameVersions containsObject:self.selectedGameVersion];
+        BOOL loaderMatch = [self.selectedLoader isEqualToString:@"全部"] || [evaluatedObject.loaders containsObject:self.selectedLoader.lowercaseString];
         return gameVersionMatch && loaderMatch;
     }];
 

@@ -10,6 +10,9 @@
 #import "utils.h"
 #include <objc/runtime.h>
 
+// 添加外部全局变量声明
+extern NSMutableArray *localVersionList;
+
 @interface FabricInstallViewController()
 @property(nonatomic) NSDictionary *endpoints;
 @property(nonatomic) NSMutableDictionary *localKVO;
@@ -19,6 +22,9 @@
 // Game metadata
 @property(nonatomic) NSArray<NSDictionary *> *versionMetadata;
 @property(nonatomic) NSMutableArray<NSString *> *versionList;
+// Installation state
+@property(nonatomic, assign) BOOL isInstalling;
+@property(nonatomic, copy) NSString *installedProfileName;
 @end
 
 @implementation FabricInstallViewController
@@ -34,10 +40,14 @@
 
     // Setup preference getter and setter
     __weak __typeof(self) weakSelf = self;
+    
+    // Use preset gameVersion if provided (from DownloadViewController)
+    NSString *initialGameVersion = self.gameVersion ?: @"1.20.1";
+    
     self.localKVO = @{
-        @"gameVersion": @"1.20.1",
+        @"gameVersion": initialGameVersion,
         @"loaderVendor": @"Fabric",
-        @"loaderVersion": @"0.14.22"
+        @"loaderVersion": @"" // 初始为空，等待网络获取后填充
     }.mutableCopy;
     self.getPreference = ^id(NSString *section, NSString *key){
         return weakSelf.localKVO[key];
@@ -89,7 +99,6 @@
               @"title": @"preference.profile.title.loader_type",
               @"type": typePickSegment,
               @"pickList": @[localize(@"Release", nil), @"Unstable"],
-              //localize(@"Unstable", nil)
               @"action": ^(int type) {
                   [weakSelf changeLoaderTypeTo:type];
               }
@@ -126,22 +135,28 @@
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     NSDictionary *endpoint = self.endpoints[self.localKVO[@"loaderVendor"]];
     [manager GET:endpoint[@"game"] parameters:nil headers:nil progress:nil  success:^(NSURLSessionTask *task, NSArray *response) {
-        NSDebugLog(@"[%@ Installer] Got %d game versions", self.localKVO[@"loaderVendor"], response.count);
+        NSDebugLog(@"[%@ Installer] Got %d game versions", self.localKVO[@"loaderVendor"], (int)response.count);
         self.versionMetadata = response;
         [self changeVersionTypeTo:[self.localKVO[@"gameType_index"] intValue]];
     } failure:errorCallback];
     [manager GET:endpoint[@"loader"] parameters:nil headers:nil progress:nil success:^(NSURLSessionTask *task, NSArray *response) {
-        NSDebugLog(@"[%@ Installer] Got %d loader versions", self.localKVO[@"loaderVendor"], response.count);
+        NSDebugLog(@"[%@ Installer] Got %d loader versions", self.localKVO[@"loaderVendor"], (int)response.count);
         self.loaderMetadata = response;
         [self changeLoaderTypeTo:[self.localKVO[@"loaderType_index"] intValue]];
     } failure:errorCallback];
 }
 
 - (void)actionClose {
+    // If there's a completion handler, call it with cancelled status
+    if (self.completionHandler) {
+        self.completionHandler(NO, nil, nil);
+    }
     [self.navigationController dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)actionDone:(UIBarButtonItem *)sender {
+    if (self.isInstalling) return;
+    self.isInstalling = YES;
     sender.enabled = NO;
 
     NSDictionary *endpoint = self.endpoints[self.localKVO[@"loaderVendor"]];
@@ -149,31 +164,139 @@
     NSDebugLog(@"[%@ Installer] Downloading %@", self.localKVO[@"loaderVendor"], path);
 
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    __weak typeof(self) weakSelf = self;
     [manager GET:path parameters:nil headers:nil progress:nil  success:^(NSURLSessionTask *task, NSDictionary *response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        
+        strongSelf.isInstalling = NO;
         sender.enabled = YES;
 
-        NSString *jsonPath = [NSString stringWithFormat:@"%1$s/versions/%2$@/%2$@.json", getenv("POJAV_GAME_DIR"), response[@"id"]];
+        NSString *jsonPath = [NSString stringWithFormat:@"%s/versions/%@/%@.json", getenv("POJAV_GAME_DIR"), response[@"id"], response[@"id"]];
         [NSFileManager.defaultManager createDirectoryAtPath:jsonPath.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil];
         NSError *error = saveJSONToFile(response, jsonPath);
         if (error) {
             showDialog(localize(@"Error", nil), error.localizedDescription);
+            if (strongSelf.completionHandler) {
+                strongSelf.completionHandler(NO, nil, error);
+            }
+            return;
+        }
+        
+        [localVersionList addObject:@{
+            @"id": response[@"id"],
+            @"type": @"custom"}];
+        
+        strongSelf.installedProfileName = response[@"id"];
+        
+        // If Fabric API installation is requested
+        if (strongSelf.shouldInstallAPI && [strongSelf.localKVO[@"loaderVendor"] isEqualToString:@"Fabric"]) {
+            [strongSelf installFabricAPIWithCompletion:^(BOOL success, NSError *apiError) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [strongSelf handleInstallationComplete:response[@"id"] endpoint:endpoint error:apiError];
+                });
+            }];
         } else {
-            [localVersionList addObject:@{
-                @"id": response[@"id"],
-                @"type": @"custom"}];
-            // Jump to the profile editor
-            LauncherProfileEditorViewController *vc = [LauncherProfileEditorViewController new];
-            vc.profile = @{
-                @"icon": endpoint[@"icon"],
-                @"name": response[@"id"],
-                @"lastVersionId": response[@"id"]
-            }.mutableCopy;
-            [self.navigationController pushViewController:vc animated:YES];
+            [strongSelf handleInstallationComplete:response[@"id"] endpoint:endpoint error:nil];
         }
     } failure:^(NSURLSessionTask *operation, NSError *error) {
-        sender.enabled = YES;
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf) {
+            strongSelf.isInstalling = NO;
+            sender.enabled = YES;
+        }
         NSDebugLog(@"Error: %@", error);
         showDialog(localize(@"Error", nil), error.localizedDescription);
+        if (strongSelf.completionHandler) {
+            strongSelf.completionHandler(NO, nil, error);
+        }
+    }];
+}
+
+- (void)handleInstallationComplete:(NSString *)profileId endpoint:(NSDictionary *)endpoint error:(NSError *)error {
+    if (error) {
+        if (self.completionHandler) {
+            self.completionHandler(NO, nil, error);
+        }
+        return;
+    }
+    
+    if (self.completionHandler) {
+        // New mode: callback to caller (DownloadViewController)
+        self.completionHandler(YES, profileId, nil);
+        [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+    } else {
+        // Legacy mode: jump to profile editor
+        LauncherProfileEditorViewController *vc = [LauncherProfileEditorViewController new];
+        vc.profile = @{
+            @"icon": endpoint[@"icon"],
+            @"name": profileId,
+            @"lastVersionId": profileId
+        }.mutableCopy;
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+}
+
+- (void)installFabricAPIWithCompletion:(void (^)(BOOL success, NSError *error))completion {
+    NSString *gameVersion = self.localKVO[@"gameVersion"];
+    
+    // Fabric API download URL from Modrinth
+    NSString *apiUrl = [NSString stringWithFormat:@"https://api.modrinth.com/v2/project/fabric-api/version?game_versions=[\"%@\"]&loaders=[\"fabric\"]", gameVersion];
+    
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    [manager GET:apiUrl parameters:nil headers:nil progress:nil success:^(NSURLSessionTask *task, NSArray *response) {
+        if (response.count == 0) {
+            NSDebugLog(@"[Fabric Installer] No Fabric API version found for game version %@", gameVersion);
+            if (completion) completion(YES, nil); // Not an error, just no API available
+            return;
+        }
+        
+        // Get the latest version
+        NSDictionary *latestVersion = response.firstObject;
+        NSArray *files = latestVersion[@"files"];
+        NSDictionary *primaryFile = nil;
+        for (NSDictionary *file in files) {
+            if ([file[@"primary"] boolValue]) {
+                primaryFile = file;
+                break;
+            }
+        }
+        
+        if (!primaryFile) {
+            primaryFile = files.firstObject;
+        }
+        
+        NSString *downloadUrl = primaryFile[@"url"];
+        NSString *fileName = primaryFile[@"filename"];
+        
+        // 获取当前实例的 mods 文件夹路径
+        NSString *instanceName = PLProfiles.current.selectedProfileName ?: @"default";
+        NSString *gameDir = [NSString stringWithUTF8String:getenv("POJAV_GAME_DIR")];
+        NSString *instanceDir = [gameDir stringByAppendingPathComponent:instanceName];
+        NSString *modsPath = [instanceDir stringByAppendingPathComponent:@"mods"];
+        
+        // Ensure mods directory exists
+        [[NSFileManager defaultManager] createDirectoryAtPath:modsPath withIntermediateDirectories:YES attributes:nil error:nil];
+        
+        NSURL *url = [NSURL URLWithString:downloadUrl];
+        NSURLSessionDownloadTask *downloadTask = [[NSURLSession sharedSession] downloadTaskWithURL:url completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
+            if (error) {
+                NSDebugLog(@"[Fabric Installer] Failed to download Fabric API: %@", error);
+                if (completion) completion(NO, error);
+                return;
+            }
+            
+            NSString *destPath = [modsPath stringByAppendingPathComponent:fileName];
+            [[NSFileManager defaultManager] moveItemAtURL:location toURL:[NSURL fileURLWithPath:destPath] error:nil];
+            NSDebugLog(@"[Fabric Installer] Fabric API installed: %@", destPath);
+            if (completion) completion(YES, nil);
+        }];
+        
+        [downloadTask resume];
+    } failure:^(NSURLSessionTask *operation, NSError *error) {
+        NSDebugLog(@"[Fabric Installer] Failed to fetch Fabric API versions: %@", error);
+        // Not a critical error, continue with installation
+        if (completion) completion(YES, nil);
     }];
 }
 
@@ -190,6 +313,10 @@
         }
         [list addObject:version[@"version"]];
     }
+    // 按版本号降序排序（新版本在前）
+    [list sortUsingComparator:^NSComparisonResult(NSString *v1, NSString *v2) {
+        return [v2 compare:v1 options:NSNumericSearch];
+    }];
     self.localKVO[key] = list.firstObject;
     [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:row inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 }

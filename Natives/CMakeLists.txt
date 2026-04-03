@@ -160,6 +160,11 @@ add_executable(AngelAuraAmethyst
   LauncherMenuViewController.m
   LauncherNavigationController.m
   LauncherNewsViewController.m
+  LauncherRootViewController.m
+  LauncherRightPanelViewController.m
+  VersionManagerViewController.m
+  ProfileSettingsViewController.m
+  DownloadViewController.m
   LauncherPreferences.m
   LauncherPreferencesViewController.m
   LauncherPrefContCfgViewController.m
@@ -172,6 +177,7 @@ add_executable(AngelAuraAmethyst
   MinecraftResourceUtils.m
   PickTextField.m
   PLLogOutputView.m
+  PLCrashView.m
   PLPickerView.m
   PLPreferences.m
   PLPrefTableViewController.m
@@ -188,6 +194,9 @@ add_executable(AngelAuraAmethyst
   ios_uikit_bridge.m
   utils.m
 
+  # Version card cell (shared between DownloadViewController and LauncherProfilesViewController)
+  VersionCardCell.m
+
   # Mod-related sources (ensure implementations are compiled and linked)
   MarqueeLabel.m
   ModItem.m
@@ -199,13 +208,38 @@ add_executable(AngelAuraAmethyst
   ModVersionViewController.m
   ModVersionTableViewCell.m
 
+  # Shader-related sources
+  ShaderItem.m
+  ShaderService.m
+  ShaderTableViewCell.m
+  ShaderVersion.m
+  ShaderVersionTableViewCell.m
+  ShaderVersionViewController.m
+  ShadersManagerViewController.m
+
+  # Modpack import sources
+  ModpackImportViewController.m
+  ModpackImportService.m
+
   # Custom icon management sources
   CustomIconManager.m
   ImageCropperViewController.m
 
+  # Background wallpaper sources
+  BackgroundManager.m
+  BackgroundSettingsViewController.m
+
+  # FCL-style interface is implemented in LauncherMenuViewController.m
+
   # TouchController bridge and preferences
   TouchControllerBridge.m
   TouchControllerPreferencesViewController.m
+
+  # AI Crash Fix sources
+  AIConfigService.m
+  AIFixService.m
+  AIFixViewController.m
+  AIToolKit.m
 )
 
 # Add ModLoaderIcons PNG files into the app bundle Resources/ModLoaderIcons so they are available at runtime.
@@ -275,6 +309,7 @@ target_link_libraries(AngelAuraAmethyst
   "-framework CoreFoundation"
   "-framework CoreGraphics"
   "-framework CoreImage"
+  "-framework CoreMedia"
   "-framework CoreMotion"
   "-framework GameController"
   "-framework IOKit"

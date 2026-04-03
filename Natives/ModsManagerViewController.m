@@ -3,11 +3,9 @@
 #import "ModService.h"
 #import "ModItem.h"
 #import "installer/modpack/ModrinthAPI.h"
-#import "utils.h"
 
 @interface ModsManagerViewController () <UITableViewDataSource, UITableViewDelegate, ModTableViewCellDelegate, UISearchBarDelegate, ModVersionViewControllerDelegate>
 
-// ... (all existing properties are the same)
 @property (nonatomic, strong) UISegmentedControl *modeSwitcher;
 @property (nonatomic, strong) UISearchBar *searchBar;
 @property (nonatomic, strong) UITableView *tableView;
@@ -21,34 +19,34 @@
 
 @implementation ModsManagerViewController
 
-// ... (viewDidLoad, setupUI, modeChanged, updateUIForCurrentMode, updateNavigationButtons are the same)
-
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = localize(@"profile.manage_mods", nil);
+    self.title = @"管理 Mod";
     self.view.backgroundColor = [UIColor systemBackgroundColor];
-    self.currentMode = ModsManagerModeLocal;
+    self.currentMode = self.initialMode; // Use initialMode if set
     self.localMods = [NSMutableArray array];
     self.filteredLocalMods = [NSMutableArray array];
     self.onlineSearchResults = [NSMutableArray array];
     [self setupUI];
-    [self refreshLocalModsList];
+    [self updateUIForCurrentMode]; // Update UI based on current mode
+    if (self.currentMode == ModsManagerModeLocal) {
+        [self refreshLocalModsList];
+    }
 }
 
 - (void)setupUI {
-    self.modeSwitcher = [[UISegmentedControl alloc] initWithItems:@[
-        localize(@"mods.mode.local", nil),
-        localize(@"mods.mode.online", nil)
-    ]];
+    self.modeSwitcher = [[UISegmentedControl alloc] initWithItems:@[@"本地 Mod", @"在线搜索 (Modrinth)"]];
     self.modeSwitcher.translatesAutoresizingMaskIntoConstraints = NO;
-    self.modeSwitcher.selectedSegmentIndex = 0;
+    self.modeSwitcher.selectedSegmentIndex = self.currentMode; // Set based on initial mode
     [self.modeSwitcher addTarget:self action:@selector(modeChanged:) forControlEvents:UIControlEventValueChanged];
     [self.view addSubview:self.modeSwitcher];
+
     self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectZero];
     self.searchBar.translatesAutoresizingMaskIntoConstraints = NO;
     self.searchBar.delegate = self;
-    self.searchBar.placeholder = localize(@"mods.search.local.placeholder", nil);
+    self.searchBar.placeholder = @"搜索本地 Mod...";
     [self.view addSubview:self.searchBar];
+
     self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     self.tableView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.tableView registerClass:[ModTableViewCell class] forCellReuseIdentifier:@"ModCell"];
@@ -57,34 +55,43 @@
     self.tableView.rowHeight = 50;
     self.tableView.tableFooterView = [UIView new];
     [self.view addSubview:self.tableView];
+
     UIRefreshControl *rc = [UIRefreshControl new];
     [rc addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventValueChanged];
     self.tableView.refreshControl = rc;
+
     self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
     self.activityIndicator.translatesAutoresizingMaskIntoConstraints = NO;
     self.activityIndicator.hidesWhenStopped = YES;
     [self.view addSubview:self.activityIndicator];
+
     self.emptyLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     self.emptyLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.emptyLabel.textAlignment = NSTextAlignmentCenter;
     self.emptyLabel.textColor = [UIColor secondaryLabelColor];
     self.emptyLabel.hidden = YES;
     [self.view addSubview:self.emptyLabel];
+
     self.refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(handleRefresh:)];
     [self updateNavigationButtons];
+
     [NSLayoutConstraint activateConstraints:@[
         [self.modeSwitcher.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:8],
         [self.modeSwitcher.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:16],
         [self.modeSwitcher.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-16],
+
         [self.searchBar.topAnchor constraintEqualToAnchor:self.modeSwitcher.bottomAnchor constant:8],
         [self.searchBar.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [self.searchBar.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+
         [self.tableView.topAnchor constraintEqualToAnchor:self.searchBar.bottomAnchor],
         [self.tableView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor],
         [self.tableView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [self.tableView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+
         [self.activityIndicator.centerXAnchor constraintEqualToAnchor:self.tableView.centerXAnchor],
         [self.activityIndicator.centerYAnchor constraintEqualToAnchor:self.tableView.centerYAnchor],
+
         [self.emptyLabel.centerXAnchor constraintEqualToAnchor:self.tableView.centerXAnchor],
         [self.emptyLabel.centerYAnchor constraintEqualToAnchor:self.tableView.centerYAnchor]
     ]];
@@ -102,12 +109,12 @@
 
 - (void)updateUIForCurrentMode {
     if (self.currentMode == ModsManagerModeLocal) {
-        self.searchBar.placeholder = localize(@"mods.search.local.placeholder", nil);
-        self.emptyLabel.text = localize(@"mods.empty.local", nil);
+        self.searchBar.placeholder = @"搜索本地 Mod...";
+        self.emptyLabel.text = @"未发现 Mod";
         self.emptyLabel.hidden = self.localMods.count > 0;
     } else {
-        self.searchBar.placeholder = localize(@"mods.search.online.placeholder", nil);
-        self.emptyLabel.text = localize(@"mods.empty.online.prompt", nil);
+        self.searchBar.placeholder = @"在线搜索 Modrinth...";
+        self.emptyLabel.text = @"输入关键词进行在线搜索";
         self.emptyLabel.hidden = self.onlineSearchResults.count > 0;
     }
     // Re-enable pull-to-refresh for all modes
@@ -117,11 +124,19 @@
 }
 
 - (void)updateNavigationButtons {
+    UIBarButtonItem *closeButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(closeTapped)];
+    
     if (self.currentMode == ModsManagerModeLocal) {
         self.navigationItem.rightBarButtonItems = @[self.refreshButton];
+        self.navigationItem.leftBarButtonItem = closeButton;
     } else {
         self.navigationItem.rightBarButtonItems = nil;
+        self.navigationItem.leftBarButtonItem = closeButton;
     }
+}
+
+- (void)closeTapped {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - Data Loading
@@ -187,16 +202,15 @@
             [self setLoading:NO];
             self.emptyLabel.hidden = self.onlineSearchResults.count > 0;
             if (self.onlineSearchResults.count == 0) {
-                self.emptyLabel.text = localize(@"mods.empty.online.none", nil);
+                self.emptyLabel.text = @"未找到在线结果";
             }
             [self.tableView reloadData];
         });
     });
 }
 
-
 #pragma mark - UISearchBarDelegate
-// ... (search bar delegate methods are the same)
+
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     if (self.currentMode == ModsManagerModeLocal) {
         [self filterLocalMods];
@@ -237,13 +251,13 @@
     }
     self.emptyLabel.hidden = self.filteredLocalMods.count > 0;
     if (!self.emptyLabel.hidden) {
-        self.emptyLabel.text = localize(@"mods.empty.local.none", nil);
+        self.emptyLabel.text = @"未找到本地 Mod";
     }
     [self.tableView reloadData];
 }
 
 #pragma mark - UITableView DataSource & Delegate
-// ... (UITableView methods are the same)
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.currentMode == ModsManagerModeLocal ? self.filteredLocalMods.count : self.onlineSearchResults.count;
 }
@@ -269,17 +283,17 @@
         return nil;
     }
 
-    UIContextualAction *deleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:localize(@"Delete", nil) handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
+    UIContextualAction *deleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"删除" handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
 
         ModItem *modToDelete = self.filteredLocalMods[indexPath.row];
 
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"mods.delete.confirm.title", nil) message:[NSString stringWithFormat:localize(@"mods.delete.confirm.message", nil), modToDelete.displayName] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"确认删除" message:[NSString stringWithFormat:@"确定要删除 %@ 吗？\n此操作无法撤销。", modToDelete.displayName] preferredStyle:UIAlertControllerStyleAlert];
 
-        [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil) style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             completionHandler(NO);
         }]];
 
-        [alert addAction:[UIAlertAction actionWithTitle:localize(@"Delete", nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
             NSError *error = nil;
             [[ModService sharedService] deleteMod:modToDelete error:&error];
 
@@ -313,7 +327,6 @@
     return configuration;
 }
 
-
 #pragma mark - ModTableViewCellDelegate (Download Implementation)
 
 - (void)modCellDidTapDownload:(UITableViewCell *)cell {
@@ -338,7 +351,7 @@
     // Find the primary file to download
     NSDictionary *primaryFile = version.primaryFile;
     if (!primaryFile || ![primaryFile[@"url"] isKindOfClass:[NSString class]]) {
-        [self showSimpleAlertWithTitle:localize(@"Error", nil) message:localize(@"mods.invalid_download_link", nil)];
+        [self showSimpleAlertWithTitle:@"错误" message:@"未找到有效的下载链接。"];
         return;
     }
 
@@ -350,7 +363,7 @@
 
 - (void)startDownloadForItem:(ModItem *)item {
     // Show a temporary "downloading" alert
-    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:localize(@"mods.downloading.title", nil)
+    UIAlertController *downloadingAlert = [UIAlertController alertControllerWithTitle:@"正在下载"
                                                                               message:[NSString stringWithFormat:@"%@...", item.displayName]
                                                                        preferredStyle:UIAlertControllerStyleAlert];
 
@@ -371,12 +384,12 @@
             [downloadingAlert dismissViewControllerAnimated:YES completion:^{
                 // Then, show the result alert
                 if (error) {
-                    [self showSimpleAlertWithTitle:localize(@"mods.download.failed", nil) message:error.localizedDescription];
+                    [self showSimpleAlertWithTitle:@"下载失败" message:error.localizedDescription];
                 } else {
-                    UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:localize(@"mods.download.success", nil)
-                                                                                          message:[NSString stringWithFormat:localize(@"mods.download.success.message", nil), item.displayName]
+                    UIAlertController *successAlert = [UIAlertController alertControllerWithTitle:@"下载成功"
+                                                                                          message:[NSString stringWithFormat:@"%@ 已成功安装。", item.displayName]
                                                                                    preferredStyle:UIAlertControllerStyleAlert];
-                    [successAlert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    [successAlert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         // After user acknowledges, switch to local mods and refresh
                         [self.modeSwitcher setSelectedSegmentIndex:0];
                         [self modeChanged:self.modeSwitcher];
@@ -391,7 +404,7 @@
 
 - (void)showSimpleAlertWithTitle:(NSString *)title message:(NSString *)message {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:nil]];
     [self presentViewController:alert animated:YES completion:nil];
 }
 
@@ -442,8 +455,8 @@
         }
     } else {
         // Optionally, inform the user that there's no link available
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"mods.link.unavailable.title", nil) message:localize(@"mods.link.unavailable.message", nil) preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:localize(@"OK", nil) style:UIAlertActionStyleDefault handler:nil]];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"链接不可用" message:@"该 Mod 没有可用的在线链接。" preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:nil]];
         [self presentViewController:alert animated:YES completion:nil];
     }
 }

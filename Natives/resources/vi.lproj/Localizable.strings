@@ -490,6 +490,11 @@
 "mods.link.unavailable.message" = "Mod này không có liên kết trực tuyến khả dụng.";
 "mods.open_link_failed" = "Không thể mở liên kết";
 "mods.action.download" = "Tải xuống";
+"mods.action.enable" = "Bat";
+"mods.action.disable" = "Tat";
+"mods.toggle.failed.title" = "Chuyen trang thai that bai";
+"mods.toggle.failed.message" = "Khong the thay doi trang thai mod.";
+"mods.delete.failed.message" = "Khong the xoa tep mod.";
 "mods.filter.all" = "Tất cả";
 "mods.filter.game.loading" = "Phiên bản game: Đang tải...";
 "mods.filter.loader.loading" = "Bộ nạp mod: Đang tải...";

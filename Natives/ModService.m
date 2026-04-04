@@ -175,41 +175,80 @@
 }
 
 #pragma mark - Mods folder detection & scan (conservative)
-- (nullable NSString *)existingModsFolderForProfile:(NSString *)profileName {
-    // ... same implementation as before ...
-    NSString *profile = profileName.length ? profileName : @"default";
-    NSFileManager *fm = [NSFileManager defaultManager];
+- (nullable NSString *)resolvedGameDirectoryForProfile:(NSString *)profileName {
+    NSString *profile = profileName.length ? profileName : PLProfiles.current.selectedProfileName;
+    NSString *profileGameDir = nil;
 
     @try {
         NSDictionary *profiles = PLProfiles.current.profiles;
         NSDictionary *prof = profiles[profile];
         if ([prof isKindOfClass:[NSDictionary class]]) {
-            NSString *gameDir = prof[@"gameDir"];
-            if ([gameDir isKindOfClass:[NSString class]] && gameDir.length > 0) {
-                NSString *modsPath = [gameDir stringByAppendingPathComponent:@"mods"];
-                BOOL isDir = NO;
-                if ([fm fileExistsAtPath:modsPath isDirectory:&isDir] && isDir) {
-                    return modsPath;
-                }
+            id resolved = [PLProfiles profile:(NSMutableDictionary *)prof resolveKey:@"gameDir"];
+            if ([resolved isKindOfClass:[NSString class]]) {
+                profileGameDir = resolved;
             }
         }
     } @catch (NSException *ex) { }
 
-    const char *gameDirC = getenv("POJAV_GAME_DIR");
-    if (gameDirC) {
-        NSString *gameDir = [NSString stringWithUTF8String:gameDirC];
-        NSString *modsPath = [gameDir stringByAppendingPathComponent:@"mods"];
-        BOOL isDir = NO;
-        if ([fm fileExistsAtPath:modsPath isDirectory:&isDir] && isDir) {
-            return modsPath;
+    if (profileGameDir.length == 0) {
+        profileGameDir = @".";
+    }
+
+    NSString *gameDir = nil;
+    if ([profileGameDir isAbsolutePath]) {
+        gameDir = profileGameDir;
+    } else {
+        const char *homeC = getenv("POJAV_HOME");
+        NSString *home = homeC ? [NSString stringWithUTF8String:homeC] : nil;
+        NSString *rootDir = getPrefObject(@"general.game_directory");
+        if (home.length > 0 && rootDir.length > 0) {
+            gameDir = [NSString stringWithFormat:@"%@/instances/%@/%@", home, rootDir, profileGameDir];
         }
     }
+
+    if (gameDir.length == 0) {
+        const char *gameDirC = getenv("POJAV_GAME_DIR");
+        if (gameDirC) {
+            gameDir = [NSString stringWithUTF8String:gameDirC];
+        }
+    }
+
+    return gameDir.stringByStandardizingPath;
+}
+
+- (nullable NSString *)modsFolderForProfile:(NSString *)profileName createIfMissing:(BOOL)createIfMissing {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *gameDir = [self resolvedGameDirectoryForProfile:profileName];
+    if (gameDir.length == 0) {
+        return nil;
+    }
+
+    NSString *modsPath = [gameDir stringByAppendingPathComponent:@"mods"];
+    BOOL isDir = NO;
+    if ([fm fileExistsAtPath:modsPath isDirectory:&isDir]) {
+        return isDir ? modsPath : nil;
+    }
+
+    if (!createIfMissing) {
+        return nil;
+    }
+
+    NSError *createError = nil;
+    if ([fm createDirectoryAtPath:modsPath withIntermediateDirectories:YES attributes:nil error:&createError]) {
+        return modsPath;
+    }
+
+    NSLog(@"[ModService] Failed to create mods folder at %@: %@", modsPath, createError.localizedDescription);
     return nil;
+}
+
+- (nullable NSString *)existingModsFolderForProfile:(NSString *)profileName {
+    return [self modsFolderForProfile:profileName createIfMissing:NO];
 }
 
 - (void)scanModsForProfile:(NSString *)profileName completion:(ModListHandler)completion {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-        NSString *modsFolder = [self existingModsFolderForProfile:profileName];
+        NSString *modsFolder = [self modsFolderForProfile:profileName createIfMissing:YES];
         NSMutableArray<ModItem *> *items = [NSMutableArray array];
 
         if (!modsFolder) {
@@ -357,7 +396,7 @@
             newPath = [currentPath substringToIndex:currentPath.length - 9];
         } else {
             // Should not happen, but handle gracefully
-            if (error) *error = [NSError errorWithDomain:@"ModServiceError" code:101 userInfo:@{NSLocalizedDescriptionKey:@"Trạng thái tệp không nhất quán, không thể bật."}];
+            if (error) *error = [NSError errorWithDomain:@"ModServiceError" code:101 userInfo:@{NSLocalizedDescriptionKey:@"Inconsistent file state, cannot enable mod."}];
             return NO;
         }
     } else {
@@ -385,10 +424,10 @@
 #pragma mark - Online Mod Downloading
 
 - (void)downloadMod:(ModItem *)mod toProfile:(NSString *)profileName completion:(ModDownloadHandler)completion {
-    NSString *modsFolder = [self existingModsFolderForProfile:profileName];
+    NSString *modsFolder = [self modsFolderForProfile:profileName createIfMissing:YES];
     if (!modsFolder) {
         if (completion) {
-            NSError *error = [NSError errorWithDomain:@"ModServiceError" code:1 userInfo:@{NSLocalizedDescriptionKey:@"Không tìm thấy thư mục Mods."}];
+            NSError *error = [NSError errorWithDomain:@"ModServiceError" code:1 userInfo:@{NSLocalizedDescriptionKey:@"Mods folder was not found."}];
             completion(error);
         }
         return;
@@ -397,7 +436,7 @@
     NSURL *url = [NSURL URLWithString:mod.selectedVersionDownloadURL];
     if (!url) {
         if (completion) {
-            NSError *error = [NSError errorWithDomain:@"ModServiceError" code:2 userInfo:@{NSLocalizedDescriptionKey:@"Liên kết tải xuống không hợp lệ."}];
+            NSError *error = [NSError errorWithDomain:@"ModServiceError" code:2 userInfo:@{NSLocalizedDescriptionKey:@"Invalid download link."}];
             completion(error);
         }
         return;
@@ -458,3 +497,4 @@
 }
 
 @end
+

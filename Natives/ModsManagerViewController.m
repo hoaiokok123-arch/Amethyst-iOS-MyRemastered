@@ -283,51 +283,73 @@
 }
 
 - (UISwipeActionsConfiguration *)tableView:(UITableView *)tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (self.currentMode != ModsManagerModeLocal) {
+    if (self.currentMode != ModsManagerModeLocal || indexPath.row >= self.filteredLocalMods.count) {
         return nil;
     }
 
+    ModItem *targetMod = self.filteredLocalMods[indexPath.row];
+    NSString *toggleTitle = targetMod.disabled ? localize(@"mods.action.enable", @"Enable") : localize(@"mods.action.disable", @"Disable");
+    UIColor *toggleColor = targetMod.disabled ? [UIColor systemGreenColor] : [UIColor systemOrangeColor];
+
+    UIContextualAction *toggleAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:toggleTitle handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
+        NSError *toggleError = nil;
+        BOOL toggled = [[ModService sharedService] toggleEnableForMod:targetMod error:&toggleError];
+        if (!toggled) {
+            [self showSimpleAlertWithTitle:localize(@"mods.toggle.failed.title", @"Toggle failed") message:toggleError.localizedDescription ?: localize(@"mods.toggle.failed.message", @"Unable to change mod state.")];
+            completionHandler(NO);
+            return;
+        }
+
+        NSInteger filteredIndex = [self.filteredLocalMods indexOfObject:targetMod];
+        if (filteredIndex != NSNotFound) {
+            NSIndexPath *currentIndexPath = [NSIndexPath indexPathForRow:filteredIndex inSection:indexPath.section];
+            [tableView reloadRowsAtIndexPaths:@[currentIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        } else {
+            [tableView reloadData];
+        }
+
+        completionHandler(YES);
+    }];
+    toggleAction.backgroundColor = toggleColor;
+
     UIContextualAction *deleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:localize(@"Delete", nil) handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
-
-        ModItem *modToDelete = self.filteredLocalMods[indexPath.row];
-
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"mods.delete.confirm.title", nil) message:[NSString stringWithFormat:localize(@"mods.delete.confirm.message", nil), modToDelete.displayName] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:localize(@"mods.delete.confirm.title", nil) message:[NSString stringWithFormat:localize(@"mods.delete.confirm.message", nil), targetMod.displayName] preferredStyle:UIAlertControllerStyleAlert];
 
         [alert addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil) style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             completionHandler(NO);
         }]];
 
         [alert addAction:[UIAlertAction actionWithTitle:localize(@"Delete", nil) style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-            NSError *error = nil;
-            [[ModService sharedService] deleteMod:modToDelete error:&error];
-
-            if (error) {
-                NSLog(@"[ModsManager] Error deleting mod: %@", error);
-                // Optionally show an alert to the user
+            NSError *deleteError = nil;
+            if (![[ModService sharedService] deleteMod:targetMod error:&deleteError]) {
+                [self showSimpleAlertWithTitle:localize(@"mods.delete.failed", nil) message:deleteError.localizedDescription ?: localize(@"mods.delete.failed.message", @"Unable to delete mod file.")];
                 completionHandler(NO);
-            } else {
-                // Remove from data source
-                NSInteger indexInFullList = [self.localMods indexOfObject:modToDelete];
-                if (indexInFullList != NSNotFound) {
-                    [self.localMods removeObjectAtIndex:indexInFullList];
-                }
-                [self.filteredLocalMods removeObjectAtIndex:indexPath.row];
-
-                // Perform the table view update
-                [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-
-                completionHandler(YES);
+                return;
             }
+
+            NSInteger indexInFullList = [self.localMods indexOfObject:targetMod];
+            if (indexInFullList != NSNotFound) {
+                [self.localMods removeObjectAtIndex:indexInFullList];
+            }
+
+            NSInteger filteredIndex = [self.filteredLocalMods indexOfObject:targetMod];
+            if (filteredIndex != NSNotFound) {
+                NSIndexPath *currentIndexPath = [NSIndexPath indexPathForRow:filteredIndex inSection:indexPath.section];
+                [self.filteredLocalMods removeObjectAtIndex:filteredIndex];
+                [tableView deleteRowsAtIndexPaths:@[currentIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            } else {
+                [tableView reloadData];
+            }
+
+            completionHandler(YES);
         }]];
 
         [self presentViewController:alert animated:YES completion:nil];
     }];
-
     deleteAction.backgroundColor = [UIColor systemRedColor];
 
-    UISwipeActionsConfiguration *configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteAction]];
-    configuration.performsFirstActionWithFullSwipe = YES; // Allow full swipe to delete
-
+    UISwipeActionsConfiguration *configuration = [UISwipeActionsConfiguration configurationWithActions:@[deleteAction, toggleAction]];
+    configuration.performsFirstActionWithFullSwipe = NO;
     return configuration;
 }
 
@@ -421,7 +443,7 @@
 
 - (void)modCellDidTapToggle:(UITableViewCell *)cell {
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
-    if (!indexPath || self.currentMode != ModsManagerModeLocal) return;
+    if (!indexPath || self.currentMode != ModsManagerModeLocal || indexPath.row >= self.filteredLocalMods.count) return;
 
     ModItem *mod = self.filteredLocalMods[indexPath.row];
 
@@ -430,13 +452,12 @@
 
     if (!success) {
         NSLog(@"[ModsManager] Error toggling mod: %@", error);
-        // Optionally show an alert to the user
-        // Revert the switch state if the operation failed
         [(ModTableViewCell *)cell updateToggleState:mod.disabled];
-    } else {
-        // The service already changed the mod's state, so we just update the UI
-        [(ModTableViewCell *)cell updateToggleState:mod.disabled];
+        [self showSimpleAlertWithTitle:localize(@"mods.toggle.failed.title", @"Toggle failed") message:error.localizedDescription ?: localize(@"mods.toggle.failed.message", @"Unable to change mod state.")];
+        return;
     }
+
+    [(ModTableViewCell *)cell updateToggleState:mod.disabled];
 }
 
 - (void)modCellDidTapOpenLink:(UITableViewCell *)cell {
@@ -466,3 +487,4 @@
 }
 
 @end
+

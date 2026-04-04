@@ -502,6 +502,11 @@
 "mods.link.unavailable.message" = "This mod does not have an online link available.";
 "mods.open_link_failed" = "Unable to open link";
 "mods.action.download" = "Download";
+"mods.action.enable" = "Enable";
+"mods.action.disable" = "Disable";
+"mods.toggle.failed.title" = "Toggle failed";
+"mods.toggle.failed.message" = "Unable to change mod state.";
+"mods.delete.failed.message" = "Unable to delete mod file.";
 "mods.filter.all" = "All";
 "mods.filter.game.loading" = "Game version: Loading...";
 "mods.filter.loader.loading" = "Loader: Loading...";

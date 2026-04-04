@@ -4,7 +4,6 @@
 #import "ModsManagerViewController.h"
 #import "ShadersManagerViewController.h"
 #import "LauncherPrefGameDirViewController.h"
-#import "ModpackImportViewController.h"
 #import "ModpackImportService.h"
 #import "LauncherPreferences.h"
 #import "utils.h"
@@ -314,7 +313,7 @@
         BOOL isiPad = width > 700;
         
         if (sectionIndex == 0) {
-            NSInteger columnCount = isiPad ? 5 : 4;
+            NSInteger columnCount = isiPad ? 5 : 3;
             NSCollectionLayoutSize *itemSize = [NSCollectionLayoutSize sizeWithWidthDimension:[NSCollectionLayoutDimension fractionalWidthDimension:1.0 / columnCount]
                                                                               heightDimension:[NSCollectionLayoutDimension absoluteDimension:100]];
             NSCollectionLayoutItem *item = [NSCollectionLayoutItem itemWithLayoutSize:itemSize];
@@ -380,6 +379,11 @@
 }
 
 - (NSString *)displayNameForProfileName:(NSString *)profileName profile:(NSDictionary *)profile {
+    NSDictionary *modpackInfo = [self importedModpackForProfileName:profileName];
+    NSString *modpackName = modpackInfo[@"name"];
+    if (modpackName.length > 0) {
+        return modpackName;
+    }
     NSString *displayName = profile[@"name"];
     return displayName.length > 0 ? displayName : profileName;
 }
@@ -425,14 +429,6 @@
     return localize(@"version_manager.unknown_version", @"Unknown version");
 }
 
-- (NSString *)modpackQuickActionSubtitle {
-    NSInteger installedCount = self.importedModpacks.count;
-    if (installedCount > 0) {
-        return [NSString stringWithFormat:localize(@"version_manager.manage_modpacks.count", @"%ld installed modpacks"), (long)installedCount];
-    }
-    return localize(@"version_manager.manage_modpacks.subtitle", @"Open installed modpacks");
-}
-
 #pragma mark - UICollectionViewDataSource
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
@@ -440,7 +436,7 @@
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (section == 0) return 4;
+    if (section == 0) return 3;
     return self.profileList.count;
 }
 
@@ -466,12 +462,6 @@
                                    title:localize(@"version_manager.manage_shaders", @"Shader Packs")
                                 subtitle:localize(@"version_manager.manage_shaders.subtitle", @"Manage installed shader packs")
                                    color:[UIColor systemPurpleColor]];
-                break;
-            case 3:
-                [cell configureWithIcon:@"shippingbox.fill"
-                                   title:localize(@"version_manager.manage_modpacks", @"Manage Modpacks")
-                                subtitle:[self modpackQuickActionSubtitle]
-                                   color:[UIColor systemTealColor]];
                 break;
         }
         return cell;
@@ -508,7 +498,6 @@
             case 0: [self openGameDirectory]; break;
             case 1: [self openModsManager]; break;
             case 2: [self openShadersManager]; break;
-            case 3: [self openModpackManager]; break;
         }
     } else {
         [self showProfileActions:self.profileList[indexPath.item]];
@@ -545,13 +534,6 @@
     ShadersManagerViewController *vc = [[ShadersManagerViewController alloc] init];
     vc.profileName = self.selectedProfile;
     vc.initialMode = ShadersManagerModeLocal;
-    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
-    nav.modalPresentationStyle = UIModalPresentationFormSheet;
-    [self presentViewController:nav animated:YES completion:nil];
-}
-
-- (void)openModpackManager {
-    ModpackImportViewController *vc = [[ModpackImportViewController alloc] init];
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     nav.modalPresentationStyle = UIModalPresentationFormSheet;
     [self presentViewController:nav animated:YES completion:nil];

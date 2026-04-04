@@ -54,7 +54,7 @@
     // 创建菜单按钮
     CGFloat buttonSize = 50;
     CGFloat spacing = 15;
-    CGFloat startY = 60;
+    CGFloat startY = 24;
     
     for (NSInteger i = 0; i < self.menuItems.count; i++) {
         NSDictionary *item = self.menuItems[i];
@@ -62,8 +62,8 @@
         [self.sidebarView addSubview:btn];
         
         [NSLayoutConstraint activateConstraints:@[
-            [btn.topAnchor constraintEqualToAnchor:self.sidebarView.topAnchor constant:startY + i * (buttonSize + spacing)],
-            [btn.centerXAnchor constraintEqualToAnchor:self.sidebarView.centerXAnchor],
+            [btn.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:startY + i * (buttonSize + spacing)],
+            [btn.centerXAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.centerXAnchor],
             [btn.widthAnchor constraintEqualToConstant:buttonSize],
             [btn.heightAnchor constraintEqualToConstant:buttonSize]
         ]];

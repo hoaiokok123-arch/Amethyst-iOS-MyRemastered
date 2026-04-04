@@ -12,6 +12,22 @@ static void *TotalProgressObserverContext = &TotalProgressObserverContext;
 
 @implementation DownloadProgressViewController
 
+- (NSArray *)fileListSnapshot {
+    @synchronized (self.task.fileList) {
+        return [self.task.fileList copy];
+    }
+}
+
+- (NSArray *)progressListSnapshot {
+    @synchronized (self.task.progressList) {
+        return [self.task.progressList copy];
+    }
+}
+
+- (NSInteger)displayedItemCount {
+    return MAX(self.fileListSnapshot.count, self.progressListSnapshot.count);
+}
+
 - (instancetype)initWithTask:(MinecraftResourceDownloadTask *)task {
     self = [super init];
     self.task = task;
@@ -61,10 +77,11 @@ static void *TotalProgressObserverContext = &TotalProgressObserverContext;
     } else if (context == TotalProgressObserverContext) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.title = progress.localizedDescription;
-            if (self.fileListCount != self.task.fileList.count) {
+            NSInteger displayedItemCount = self.displayedItemCount;
+            if (self.fileListCount != displayedItemCount) {
                 [self.tableView reloadData];
             }
-            self.fileListCount = self.task.fileList.count;
+            self.fileListCount = displayedItemCount;
         });
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -73,7 +90,7 @@ static void *TotalProgressObserverContext = &TotalProgressObserverContext;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.task.fileList.count;
+    return self.displayedItemCount;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -97,24 +114,30 @@ static void *TotalProgressObserverContext = &TotalProgressObserverContext;
         } @catch(id anException) {}
     }
 
-    NSProgress *progress = self.task.progressList[indexPath.row];
-    objc_setAssociatedObject(cell, @"progress", progress, OBJC_ASSOCIATION_ASSIGN);
-    objc_setAssociatedObject(progress, @"cell", cell, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [progress addObserver:self
-        forKeyPath:@"fractionCompleted"
-        options:NSKeyValueObservingOptionInitial
-        context:CellProgressObserverContext];
+    NSArray *fileList = self.fileListSnapshot;
+    NSArray *progressList = self.progressListSnapshot;
+    NSProgress *progress = indexPath.row < progressList.count ? progressList[indexPath.row] : nil;
+    if (progress) {
+        objc_setAssociatedObject(cell, @"progress", progress, OBJC_ASSOCIATION_ASSIGN);
+        objc_setAssociatedObject(progress, @"cell", cell, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        [progress addObserver:self
+            forKeyPath:@"fractionCompleted"
+            options:NSKeyValueObservingOptionInitial
+            context:CellProgressObserverContext];
+    } else {
+        objc_setAssociatedObject(cell, @"progress", nil, OBJC_ASSOCIATION_ASSIGN);
+    }
 
     WFWorkflowProgressView *progressView = (id)cell.accessoryView;
-    if (lastProgress && lastProgress.finished) {
+    if (!progress || (lastProgress && lastProgress.finished)) {
         [progressView reset];
     }
-    progressView.fractionCompleted = progress.fractionCompleted;
+    progressView.fractionCompleted = progress ? progress.fractionCompleted : 0;
     [progressView transitionCompletedLayerToVisible:progress.finished animated:NO haptic:NO];
-    [progressView transitionRunningLayerToVisible:!progress.finished animated:NO];
+    [progressView transitionRunningLayerToVisible:(progress != nil && !progress.finished) animated:NO];
 
-    cell.textLabel.text = self.task.fileList[indexPath.row];
-    cell.detailTextLabel.text = progress.localizedAdditionalDescription;
+    cell.textLabel.text = indexPath.row < fileList.count ? fileList[indexPath.row] : localize(@"Processing", nil);
+    cell.detailTextLabel.text = progress ? progress.localizedAdditionalDescription : localize(@"Processing", nil);
     return cell;
 }
 

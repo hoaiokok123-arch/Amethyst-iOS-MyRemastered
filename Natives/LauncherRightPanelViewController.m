@@ -80,15 +80,12 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     // 头像
     self.avatarImageView = [[UIImageView alloc] init];
     self.avatarImageView.translatesAutoresizingMaskIntoConstraints = NO;
-    self.avatarImageView.contentMode = UIViewContentModeScaleAspectFit;
     self.avatarImageView.layer.cornerRadius = 40;
     self.avatarImageView.layer.masksToBounds = YES;
-    self.avatarImageView.backgroundColor = [UIColor colorWithWhite:0.2 alpha:1.0];
-    self.avatarImageView.image = [UIImage systemImageNamed:@"person.circle.fill"];
-    self.avatarImageView.tintColor = [UIColor systemGrayColor];
     self.avatarImageView.userInteractionEnabled = YES;
     [self.avatarImageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(selectAccount:)]];
     [self.view addSubview:self.avatarImageView];
+    [self applyDefaultAvatarPlaceholder];
     
     // 用户名标签
     self.usernameLabel = [[UILabel alloc] init];
@@ -160,7 +157,7 @@ static void *ProgressObserverContext = &ProgressObserverContext;
     [NSLayoutConstraint activateConstraints:@[
         // 头像
         [self.avatarImageView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:30],
-        [self.avatarImageView.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+        [self.avatarImageView.centerXAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.centerXAnchor],
         [self.avatarImageView.widthAnchor constraintEqualToConstant:80],
         [self.avatarImageView.heightAnchor constraintEqualToConstant:80],
         
@@ -202,6 +199,48 @@ static void *ProgressObserverContext = &ProgressObserverContext;
         [self.launchButton.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-16],
         [self.launchButton.heightAnchor constraintEqualToConstant:50]
     ]];
+}
+
+- (UIImage *)defaultAvatarPlaceholderImage {
+    if (@available(iOS 13.0, *)) {
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:72 weight:UIImageSymbolWeightRegular];
+        return [UIImage systemImageNamed:@"person.crop.circle.fill" withConfiguration:config];
+    }
+    return [UIImage imageNamed:@"DefaultAccount"];
+}
+
+- (void)applyDefaultAvatarPlaceholder {
+    self.avatarImageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.avatarImageView.backgroundColor = [UIColor clearColor];
+    self.avatarImageView.tintColor = [UIColor systemGrayColor];
+    self.avatarImageView.image = [self defaultAvatarPlaceholderImage];
+}
+
+- (void)applyAvatarImage:(UIImage *)image {
+    if (!image) {
+        [self applyDefaultAvatarPlaceholder];
+        return;
+    }
+
+    self.avatarImageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.avatarImageView.backgroundColor = [UIColor colorWithWhite:0.2 alpha:1.0];
+    self.avatarImageView.tintColor = nil;
+    self.avatarImageView.image = image;
+}
+
+- (NSArray<NSString *> *)avatarURLCandidatesForAuth:(BaseAuthenticator *)currentAuth {
+    NSMutableArray<NSString *> *candidates = [NSMutableArray array];
+    NSString *avatarURL = currentAuth.authData[@"profilePicURL"];
+    if (avatarURL.length > 0) {
+        [candidates addObject:[avatarURL stringByReplacingOccurrencesOfString:@"\\/" withString:@"/"]];
+    }
+
+    NSString *uuid = currentAuth.authData[@"uuid"];
+    if (uuid.length > 0) {
+        [candidates addObject:[NSString stringWithFormat:@"https://crafatar.com/avatars/%@?overlay=true&size=128", uuid]];
+    }
+
+    return candidates;
 }
 
 #pragma mark - Actions
@@ -481,22 +520,37 @@ static void *ProgressObserverContext = &ProgressObserverContext;
         }
         
         // 加载头像
-        NSString *avatarURL = currentAuth.authData[@"profilePicURL"];
-        if (avatarURL) {
-            avatarURL = [avatarURL stringByReplacingOccurrencesOfString:@"\\/" withString:@"/"];
+        NSArray<NSString *> *avatarCandidates = [self avatarURLCandidatesForAuth:currentAuth];
+        if (avatarCandidates.count > 0) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:avatarURL]];
-                if (imageData) {
+                UIImage *avatarImage = nil;
+                for (NSString *avatarURL in avatarCandidates) {
+                    NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:avatarURL]];
+                    if (imageData.length == 0) {
+                        continue;
+                    }
+
                     UIImage *image = [UIImage imageWithData:imageData];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        self.avatarImageView.image = image;
-                    });
+                    if (image) {
+                        avatarImage = image;
+                        break;
+                    }
                 }
+
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (avatarImage) {
+                        [self applyAvatarImage:avatarImage];
+                    } else {
+                        [self applyDefaultAvatarPlaceholder];
+                    }
+                });
             });
+        } else {
+            [self applyDefaultAvatarPlaceholder];
         }
     } else {
         self.usernameLabel.text = @"Chưa đăng nhập";
-        self.avatarImageView.image = [UIImage systemImageNamed:@"person.circle.fill"];
+        [self applyDefaultAvatarPlaceholder];
     }
 }
 

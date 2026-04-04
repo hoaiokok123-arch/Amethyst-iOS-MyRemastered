@@ -125,7 +125,9 @@
         progress = [self.manager downloadProgressForTask:task];
         if (!size && task) {
             [self addDownloadTaskToProgress:task size:response.expectedContentLength];
-            [self.fileList addObject:name];
+            @synchronized (self.fileList) {
+                [self.fileList addObject:name];
+            }
         }
         [NSFileManager.defaultManager createDirectoryAtPath:path.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil];
         [NSFileManager.defaultManager removeItemAtPath:path error:nil];
@@ -184,7 +186,9 @@
 
     if (size && task) {
         [self addDownloadTaskToProgress:task size:size];
-        [self.fileList addObject:name];
+        @synchronized (self.fileList) {
+            [self.fileList addObject:name];
+        }
     }
 
     return task;
@@ -201,7 +205,9 @@
     if (size > 0) {
         progress.totalUnitCount = fileSize;
     }
-    [self.progressList addObject:progress];
+    @synchronized (self.progressList) {
+        [self.progressList addObject:progress];
+    }
     [self.progress addChild:progress withPendingUnitCount:fileSize];
     self.progress.totalUnitCount += fileSize;
     self.textProgress.totalUnitCount = self.progress.totalUnitCount;
@@ -412,8 +418,12 @@
     self.progress = [NSProgress new];
     // Push 1 byte so it won't accidentally finish after downloading assets index
     self.progress.totalUnitCount = 1;
-    [self.fileList removeAllObjects];
-    [self.progressList removeAllObjects];
+    @synchronized (self.fileList) {
+        [self.fileList removeAllObjects];
+    }
+    @synchronized (self.progressList) {
+        [self.progressList removeAllObjects];
+    }
     self.modpackCompletionHandled = NO;
     self.modpackDownloadCompletion = nil;
 }

@@ -92,6 +92,7 @@
     self.skinImageView = [[UIImageView alloc] init];
     self.skinImageView.translatesAutoresizingMaskIntoConstraints = NO;
     self.skinImageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.skinImageView.tintColor = [UIColor systemBlueColor];
     // 增加一点阴影让皮肤立体
     self.skinImageView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.skinImageView.layer.shadowOffset = CGSizeMake(0, 2);
@@ -120,15 +121,15 @@
     [NSLayoutConstraint activateConstraints:@[
         [self.skinImageView.centerYAnchor constraintEqualToAnchor:self.contentContainer.centerYAnchor],
         [self.skinImageView.leadingAnchor constraintEqualToAnchor:self.contentContainer.leadingAnchor constant:20],
-        [self.skinImageView.heightAnchor constraintEqualToAnchor:self.contentContainer.heightAnchor multiplier:0.8],
+        [self.skinImageView.heightAnchor constraintEqualToAnchor:self.contentContainer.heightAnchor multiplier:0.72],
         [self.skinImageView.widthAnchor constraintEqualToAnchor:self.skinImageView.heightAnchor multiplier:0.6], // 皮肤比例
         
         [self.welcomeLabel.leadingAnchor constraintEqualToAnchor:self.skinImageView.trailingAnchor constant:20],
-        [self.welcomeLabel.topAnchor constraintEqualToAnchor:self.skinImageView.topAnchor constant:10],
+        [self.welcomeLabel.centerYAnchor constraintEqualToAnchor:self.contentContainer.centerYAnchor constant:-12],
         [self.welcomeLabel.trailingAnchor constraintEqualToAnchor:self.contentContainer.trailingAnchor constant:-20],
         
         [self.subLabel.leadingAnchor constraintEqualToAnchor:self.welcomeLabel.leadingAnchor],
-        [self.subLabel.topAnchor constraintEqualToAnchor:self.welcomeLabel.bottomAnchor constant:4],
+        [self.subLabel.topAnchor constraintEqualToAnchor:self.welcomeLabel.bottomAnchor constant:6],
         [self.subLabel.trailingAnchor constraintEqualToAnchor:self.contentContainer.trailingAnchor constant:-20]
     ]];
 }
@@ -479,7 +480,7 @@
 }
 
 - (void)loadSkinForUUID:(NSString *)uuid {
-    NSString *skinURL = [NSString stringWithFormat:@"http://111.170.35.224:3000/renders/body/%@?overlay", uuid];
+    NSString *skinURL = [NSString stringWithFormat:@"https://crafatar.com/renders/body/%@?overlay=true&size=256", uuid];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSData *imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:skinURL]];
@@ -501,7 +502,7 @@
 }
 
 - (void)loadDefaultSkin {
-    NSString *steveSkinURL = @"http://111.170.35.224:3000/renders/body/8667ba71b85a4004af54457a9734eed7?overlay";
+    NSString *steveSkinURL = @"https://crafatar.com/renders/body/8667ba71b85a4004af54457a9734eed7?overlay=true&size=256";
     
     // 如果当前已经是默认皮肤，避免重复加载 (简单判断 image 是否为空)
     if (self.currentSkin != nil && [self.currentUsername isEqualToString:localize(@"launcher.news.not_signed_in", @"Not signed in")]) {
@@ -519,7 +520,7 @@
             if (steveSkin) {
                 self.currentSkin = steveSkin;
             } else {
-                self.currentSkin = [UIImage systemImageNamed:@"person.fill"];
+                self.currentSkin = [UIImage systemImageNamed:@"person.crop.circle.fill"];
             }
             [self.collectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
         });

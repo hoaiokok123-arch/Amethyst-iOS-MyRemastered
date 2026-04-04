@@ -22,8 +22,8 @@ static const CGFloat kRightPanelWidth = 220.0;  // 右侧面板宽度
 @property(nonatomic, strong) UIView *contentContainer;
 @property(nonatomic, strong) UIView *rightPanelContainer;
 
-@property(nonatomic, strong) NSLayoutConstraint *contentLeadingConstraint;
-@property(nonatomic, strong) NSLayoutConstraint *contentTrailingConstraint;
+@property(nonatomic, strong) NSLayoutConstraint *sidebarWidthConstraint;
+@property(nonatomic, strong) NSLayoutConstraint *rightPanelWidthConstraint;
 
 @property(nonatomic, assign) BOOL isShowingProfileEditor;
 @property(nonatomic, strong) LauncherProfileEditorViewController *profileEditorVC;
@@ -126,6 +126,11 @@ static const CGFloat kRightPanelWidth = 220.0;  // 右侧面板宽度
     [[BackgroundManager sharedManager] pauseVideo];
 }
 
+- (void)viewSafeAreaInsetsDidChange {
+    [super viewSafeAreaInsetsDidChange];
+    [self updateContainerWidthsForSafeArea];
+}
+
 #pragma mark - Setup
 
 - (void)setupContainers {
@@ -146,6 +151,9 @@ static const CGFloat kRightPanelWidth = 220.0;  // 右侧面板宽度
     self.rightPanelContainer.translatesAutoresizingMaskIntoConstraints = NO;
     self.rightPanelContainer.backgroundColor = [UIColor colorWithWhite:0.08 alpha:0.7];
     [self.view addSubview:self.rightPanelContainer];
+
+    self.sidebarWidthConstraint = [self.sidebarContainer.widthAnchor constraintEqualToConstant:kSidebarWidth];
+    self.rightPanelWidthConstraint = [self.rightPanelContainer.widthAnchor constraintEqualToConstant:kRightPanelWidth];
     
     // 设置约束
     [NSLayoutConstraint activateConstraints:@[
@@ -153,13 +161,13 @@ static const CGFloat kRightPanelWidth = 220.0;  // 右侧面板宽度
         [self.sidebarContainer.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
         [self.sidebarContainer.topAnchor constraintEqualToAnchor:self.view.topAnchor],
         [self.sidebarContainer.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
-        [self.sidebarContainer.widthAnchor constraintEqualToConstant:kSidebarWidth],
+        self.sidebarWidthConstraint,
         
         // 右侧面板
         [self.rightPanelContainer.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
         [self.rightPanelContainer.topAnchor constraintEqualToAnchor:self.view.topAnchor],
         [self.rightPanelContainer.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
-        [self.rightPanelContainer.widthAnchor constraintEqualToConstant:kRightPanelWidth],
+        self.rightPanelWidthConstraint,
         
         // 中间内容区
         [self.contentContainer.leadingAnchor constraintEqualToAnchor:self.sidebarContainer.trailingAnchor],
@@ -167,6 +175,14 @@ static const CGFloat kRightPanelWidth = 220.0;  // 右侧面板宽度
         [self.contentContainer.topAnchor constraintEqualToAnchor:self.view.topAnchor],
         [self.contentContainer.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor]
     ]];
+
+    [self updateContainerWidthsForSafeArea];
+}
+
+- (void)updateContainerWidthsForSafeArea {
+    UIEdgeInsets safeInsets = self.view.safeAreaInsets;
+    self.sidebarWidthConstraint.constant = kSidebarWidth + MAX(safeInsets.left, 0);
+    self.rightPanelWidthConstraint.constant = kRightPanelWidth + MAX(safeInsets.right, 0);
 }
 
 - (void)setupChildViewControllers {

@@ -264,11 +264,28 @@
     NSDictionary *modpack = self.importedModpacks[indexPath.row];
     NSString *unknownText = localize(@"modpack.library.unknown", nil);
     NSString *name = modpack[@"name"] ?: unknownText;
+    NSString *version = modpack[@"version"] ?: unknownText;
     NSString *mcVersion = modpack[@"minecraftVersion"] ?: unknownText;
     NSString *loader = modpack[@"loader"] ?: unknownText;
+    NSString *loaderVersion = modpack[@"loaderVersion"] ?: @"";
+    NSString *loaderText = loader;
+    if (loaderVersion.length > 0 && ![loaderVersion isEqualToString:unknownText]) {
+        loaderText = [NSString stringWithFormat:@"%@ %@", loader, loaderVersion];
+    }
+
+    NSMutableArray<NSString *> *detailParts = [NSMutableArray array];
+    if (version.length > 0) {
+        [detailParts addObject:[NSString stringWithFormat:localize(@"version_manager.profile_modpack_version", @"Modpack %@"), version]];
+    }
+    if (mcVersion.length > 0) {
+        [detailParts addObject:[NSString stringWithFormat:localize(@"version_manager.profile_minecraft_version", @"Minecraft %@"), mcVersion]];
+    }
+    if (loaderText.length > 0) {
+        [detailParts addObject:loaderText];
+    }
 
     cell.textLabel.text = name;
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"Minecraft %@ - %@", mcVersion, loader];
+    cell.detailTextLabel.text = detailParts.count > 0 ? [detailParts componentsJoinedByString:@" - "] : unknownText;
     cell.detailTextLabel.textColor = [UIColor secondaryLabelColor];
     cell.imageView.image = [UIImage systemImageNamed:@"archivebox"];
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;

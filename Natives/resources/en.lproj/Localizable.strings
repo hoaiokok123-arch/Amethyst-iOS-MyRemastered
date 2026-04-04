@@ -658,9 +658,14 @@
 "version_manager.delete_confirm.message" = "Delete \"%@\"?";
 "version_manager.delete_confirm.title" = "Confirm deletion";
 "version_manager.manage_mods.subtitle" = "Manage installed mods";
+"version_manager.manage_modpacks" = "Manage Modpacks";
+"version_manager.manage_modpacks.count" = "%ld installed modpacks";
+"version_manager.manage_modpacks.subtitle" = "Open installed modpacks";
 "version_manager.manage_shaders" = "Shader Packs";
 "version_manager.manage_shaders.subtitle" = "Manage installed shader packs";
 "version_manager.min_profile_required" = "At least one profile must remain";
+"version_manager.profile_minecraft_version" = "Minecraft %@";
+"version_manager.profile_modpack_version" = "Modpack %@";
 "version_manager.select_profile" = "Select this profile";
 "version_manager.select_profile_first" = "Please select a profile first";
 "version_manager.title" = "Version Manager";

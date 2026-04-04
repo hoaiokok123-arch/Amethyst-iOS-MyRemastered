@@ -633,9 +633,14 @@
 "version_manager.delete_confirm.message" = "Xóa \"%@\"?";
 "version_manager.delete_confirm.title" = "Xác nhận xóa";
 "version_manager.manage_mods.subtitle" = "Quản lý mod đã cài";
+"version_manager.manage_modpacks" = "Quản lý modpack";
+"version_manager.manage_modpacks.count" = "%ld modpack đã cài";
+"version_manager.manage_modpacks.subtitle" = "Mở modpack đã cài";
 "version_manager.manage_shaders" = "Gói shader";
 "version_manager.manage_shaders.subtitle" = "Quản lý gói shader đã cài";
 "version_manager.min_profile_required" = "Phải giữ lại ít nhất một hồ sơ";
+"version_manager.profile_minecraft_version" = "Minecraft %@";
+"version_manager.profile_modpack_version" = "Modpack %@";
 "version_manager.select_profile" = "Chọn hồ sơ này";
 "version_manager.select_profile_first" = "Hãy chọn một hồ sơ trước";
 "version_manager.title" = "Quản lý phiên chơi";

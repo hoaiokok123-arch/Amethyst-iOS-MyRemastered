@@ -4,6 +4,8 @@
 #import "ModsManagerViewController.h"
 #import "ShadersManagerViewController.h"
 #import "LauncherPrefGameDirViewController.h"
+#import "ModpackImportViewController.h"
+#import "ModpackImportService.h"
 #import "LauncherPreferences.h"
 #import "utils.h"
 #import <QuartzCore/QuartzCore.h>
@@ -93,13 +95,14 @@
     self.titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightSemibold];
     self.titleLabel.textColor = [UIColor labelColor];
+    self.titleLabel.numberOfLines = 2;
     [self.contentContainer addSubview:self.titleLabel];
     
     self.subtitleLabel = [[UILabel alloc] init];
     self.subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.subtitleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleCaption2];
     self.subtitleLabel.textColor = [UIColor secondaryLabelColor];
-    self.subtitleLabel.numberOfLines = 1;
+    self.subtitleLabel.numberOfLines = 2;
     [self.contentContainer addSubview:self.subtitleLabel];
     
     [NSLayoutConstraint activateConstraints:@[
@@ -242,6 +245,8 @@
 @property (nonatomic, strong) UICollectionView *collectionView;
 @property (nonatomic, strong) NSArray<NSString *> *profileList;
 @property (nonatomic, strong) NSString *selectedProfile;
+@property (nonatomic, strong) NSArray<NSDictionary *> *importedModpacks;
+@property (nonatomic, strong) NSDictionary<NSString *, NSDictionary *> *importedModpacksByProfileName;
 @end
 
 @implementation VersionManagerViewController
@@ -309,8 +314,7 @@
         BOOL isiPad = width > 700;
         
         if (sectionIndex == 0) {
-            // Quick actions section - 5 items total
-            NSInteger columnCount = isiPad ? 5 : 3;
+            NSInteger columnCount = isiPad ? 5 : 4;
             NSCollectionLayoutSize *itemSize = [NSCollectionLayoutSize sizeWithWidthDimension:[NSCollectionLayoutDimension fractionalWidthDimension:1.0 / columnCount]
                                                                               heightDimension:[NSCollectionLayoutDimension absoluteDimension:100]];
             NSCollectionLayoutItem *item = [NSCollectionLayoutItem itemWithLayoutSize:itemSize];
@@ -357,6 +361,76 @@
         return [obj2 compare:obj1];
     }];
     self.selectedProfile = PLProfiles.current.selectedProfileName;
+
+    NSArray<NSDictionary *> *importedModpacks = [[[ModpackImportService alloc] init] getImportedModpacks];
+    self.importedModpacks = importedModpacks ?: @[];
+
+    NSMutableDictionary<NSString *, NSDictionary *> *byProfileName = [NSMutableDictionary dictionary];
+    for (NSDictionary *modpackInfo in self.importedModpacks) {
+        NSString *profileName = modpackInfo[@"profileName"];
+        if (profileName.length > 0) {
+            byProfileName[profileName] = modpackInfo;
+        }
+    }
+    self.importedModpacksByProfileName = byProfileName;
+}
+
+- (NSDictionary *)importedModpackForProfileName:(NSString *)profileName {
+    return self.importedModpacksByProfileName[profileName];
+}
+
+- (NSString *)displayNameForProfileName:(NSString *)profileName profile:(NSDictionary *)profile {
+    NSString *displayName = profile[@"name"];
+    return displayName.length > 0 ? displayName : profileName;
+}
+
+- (NSString *)formattedLoaderTextForModpackInfo:(NSDictionary *)modpackInfo {
+    NSString *loader = modpackInfo[@"loader"];
+    NSString *loaderVersion = modpackInfo[@"loaderVersion"];
+    if (loader.length == 0) {
+        return @"";
+    }
+    if (loaderVersion.length > 0) {
+        return [NSString stringWithFormat:@"%@ %@", loader, loaderVersion];
+    }
+    return loader;
+}
+
+- (NSString *)detailTextForProfileName:(NSString *)profileName profile:(NSDictionary *)profile {
+    NSDictionary *modpackInfo = [self importedModpackForProfileName:profileName];
+    if (modpackInfo.count > 0) {
+        NSMutableArray<NSString *> *parts = [NSMutableArray array];
+        NSString *modpackVersion = modpackInfo[@"version"];
+        NSString *minecraftVersion = modpackInfo[@"minecraftVersion"];
+        NSString *loaderText = [self formattedLoaderTextForModpackInfo:modpackInfo];
+
+        if (modpackVersion.length > 0) {
+            [parts addObject:[NSString stringWithFormat:localize(@"version_manager.profile_modpack_version", @"Modpack %@"), modpackVersion]];
+        }
+        if (minecraftVersion.length > 0) {
+            [parts addObject:[NSString stringWithFormat:localize(@"version_manager.profile_minecraft_version", @"Minecraft %@"), minecraftVersion]];
+        }
+        if (loaderText.length > 0) {
+            [parts addObject:loaderText];
+        }
+        if (parts.count > 0) {
+            return [parts componentsJoinedByString:@" - "];
+        }
+    }
+
+    NSString *versionId = profile[@"lastVersionId"];
+    if (versionId.length > 0) {
+        return versionId;
+    }
+    return localize(@"version_manager.unknown_version", @"Unknown version");
+}
+
+- (NSString *)modpackQuickActionSubtitle {
+    NSInteger installedCount = self.importedModpacks.count;
+    if (installedCount > 0) {
+        return [NSString stringWithFormat:localize(@"version_manager.manage_modpacks.count", @"%ld installed modpacks"), (long)installedCount];
+    }
+    return localize(@"version_manager.manage_modpacks.subtitle", @"Open installed modpacks");
 }
 
 #pragma mark - UICollectionViewDataSource
@@ -366,7 +440,7 @@
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (section == 0) return 3;
+    if (section == 0) return 4;
     return self.profileList.count;
 }
 
@@ -393,6 +467,12 @@
                                 subtitle:localize(@"version_manager.manage_shaders.subtitle", @"Manage installed shader packs")
                                    color:[UIColor systemPurpleColor]];
                 break;
+            case 3:
+                [cell configureWithIcon:@"shippingbox.fill"
+                                   title:localize(@"version_manager.manage_modpacks", @"Manage Modpacks")
+                                subtitle:[self modpackQuickActionSubtitle]
+                                   color:[UIColor systemTealColor]];
+                break;
         }
         return cell;
     } else {
@@ -400,10 +480,11 @@
         
         NSString *profileName = self.profileList[indexPath.item];
         NSDictionary *profile = PLProfiles.current.profiles[profileName];
-        NSString *versionId = profile[@"lastVersionId"] ?: localize(@"version_manager.unknown_version", @"Unknown version");
         BOOL isSelected = [profileName isEqualToString:self.selectedProfile];
         
-        [cell configureWithName:profileName version:versionId isSelected:isSelected];
+        [cell configureWithName:[self displayNameForProfileName:profileName profile:profile]
+                        version:[self detailTextForProfileName:profileName profile:profile]
+                     isSelected:isSelected];
         return cell;
     }
 }
@@ -427,6 +508,7 @@
             case 0: [self openGameDirectory]; break;
             case 1: [self openModsManager]; break;
             case 2: [self openShadersManager]; break;
+            case 3: [self openModpackManager]; break;
         }
     } else {
         [self showProfileActions:self.profileList[indexPath.item]];
@@ -468,12 +550,21 @@
     [self presentViewController:nav animated:YES completion:nil];
 }
 
+- (void)openModpackManager {
+    ModpackImportViewController *vc = [[ModpackImportViewController alloc] init];
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+    nav.modalPresentationStyle = UIModalPresentationFormSheet;
+    [self presentViewController:nav animated:YES completion:nil];
+}
+
 - (void)showProfileActions:(NSString *)profileName {
     NSDictionary *profile = PLProfiles.current.profiles[profileName];
     BOOL isSelected = [profileName isEqualToString:self.selectedProfile];
+    NSString *displayName = [self displayNameForProfileName:profileName profile:profile];
+    NSString *detailText = [self detailTextForProfileName:profileName profile:profile];
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:profileName
-                                                                   message:profile[@"lastVersionId"]
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:displayName
+                                                                   message:detailText
                                                             preferredStyle:UIAlertControllerStyleActionSheet];
     
     if (!isSelected) {
@@ -511,9 +602,12 @@
         [self showAlert:localize(@"version_manager.min_profile_required", @"At least one profile must be kept")];
         return;
     }
+
+    NSDictionary *profile = PLProfiles.current.profiles[profileName];
+    NSString *displayName = [self displayNameForProfileName:profileName profile:profile];
     
     UIAlertController *confirm = [UIAlertController alertControllerWithTitle:localize(@"version_manager.delete_confirm.title", @"Confirm deletion")
-                                                                     message:[NSString stringWithFormat:localize(@"version_manager.delete_confirm.message", @"Delete \"%@\"?"), profileName]
+                                                                     message:[NSString stringWithFormat:localize(@"version_manager.delete_confirm.message", @"Delete \"%@\"?"), displayName]
                                                               preferredStyle:UIAlertControllerStyleAlert];
     
     [confirm addAction:[UIAlertAction actionWithTitle:localize(@"Cancel", nil) style:UIAlertActionStyleCancel handler:nil]];

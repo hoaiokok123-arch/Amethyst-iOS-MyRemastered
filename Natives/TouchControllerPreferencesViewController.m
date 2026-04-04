@@ -55,7 +55,7 @@ typedef NS_ENUM(NSInteger, TouchControllerCommMode) {
     self.typeChildPane = ^void(UITableViewCell *cell, NSString *section, NSString *key, NSDictionary *item) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
-        cell.textLabel.text = item[@"title"];
+        cell.textLabel.text = localize(item[@"title"], nil);
         NSInteger mode = [weakSelf.getPreference(section, key) integerValue];
         switch (mode) {
             case TouchControllerCommModeUDP:
@@ -73,14 +73,14 @@ typedef NS_ENUM(NSInteger, TouchControllerCommMode) {
     // 按钮类型
     self.typeButton = ^void(UITableViewCell *cell, NSString *section, NSString *key, NSDictionary *item) {
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
-        cell.textLabel.text = item[@"title"];
+        cell.textLabel.text = localize(item[@"title"], nil);
         cell.textLabel.textColor = weakSelf.view.tintColor;
     };
 
     // 滑块类型（震动强度）
     self.typeSlider = ^void(UITableViewCell *cell, NSString *section, NSString *key, NSDictionary *item) {
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.textLabel.text = item[@"title"];
+        cell.textLabel.text = localize(item[@"title"], nil);
 
         // 创建滑块
         UISlider *slider = [[UISlider alloc] initWithFrame:CGRectMake(0, 0, 200, 30)];

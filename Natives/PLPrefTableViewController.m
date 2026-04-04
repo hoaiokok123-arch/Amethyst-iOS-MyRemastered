@@ -17,6 +17,32 @@
 
 @end
 
+static NSString *PLLocalizedPreferenceDisplayValue(id value, NSDictionary *item) {
+    if ([value isKindOfClass:[NSString class]]) {
+        NSString *stringValue = (NSString *)value;
+        NSArray *pickKeys = item[@"pickKeys"];
+        NSArray *pickList = item[@"pickList"];
+        NSUInteger index = [pickKeys indexOfObject:stringValue];
+        if (pickKeys && pickList && index != NSNotFound && index < pickList.count && [pickList[index] isKindOfClass:[NSString class]]) {
+            stringValue = pickList[index];
+        }
+        if ([stringValue isEqualToString:@"(default)"]) {
+            return localize(@"(default)", nil);
+        }
+        if ([stringValue containsString:@"."] && ![stringValue hasSuffix:@".json"]) {
+            NSString *localizedValue = localize(stringValue, nil);
+            if (localizedValue.length > 0) {
+                return localizedValue;
+            }
+        }
+        return stringValue;
+    }
+    if ([value isKindOfClass:[NSNumber class]]) {
+        return [value boolValue] ? @"YES" : @"NO";
+    }
+    return [value description];
+}
+
 @implementation PLPrefTableViewController
 
 - (id)init {
@@ -173,13 +199,7 @@
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         id value = weakSelf.getPreference(section, key);
-        if ([value isKindOfClass:[NSString class]]) {
-            cell.detailTextLabel.text = value;
-        } else if ([value isKindOfClass:[NSNumber class]]) {
-            cell.detailTextLabel.text = [value boolValue] ? @"YES" : @"NO";
-        } else {
-            cell.detailTextLabel.text = [value description];
-        }
+        cell.detailTextLabel.text = PLLocalizedPreferenceDisplayValue(value, item);
     };
 
     self.typeTextField = ^void(UITableViewCell *cell, NSString *section, NSString *key, NSDictionary *item) {
@@ -206,13 +226,7 @@
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.selectionStyle = UITableViewCellSelectionStyleGray;
         id value = weakSelf.getPreference(section, key);
-        if ([value isKindOfClass:[NSString class]]) {
-            cell.detailTextLabel.text = value;
-        } else if ([value isKindOfClass:[NSNumber class]]) {
-            cell.detailTextLabel.text = [value boolValue] ? @"YES" : @"NO";
-        } else {
-            cell.detailTextLabel.text = [value description];
-        }
+        cell.detailTextLabel.text = PLLocalizedPreferenceDisplayValue(value, item);
     };
 
     self.typeSlider = ^void(UITableViewCell *cell, NSString *section, NSString *key, NSDictionary *item) {
@@ -366,6 +380,8 @@
 - (void)tableView:(UITableView *)tableView openPickerAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     NSDictionary *item = self.prefContents[indexPath.section][indexPath.row];
+    NSString *section = self.prefSections ? self.prefSections[indexPath.section] : nil;
+    id currentValue = self.getPreference(section, item[@"key"]);
 
     NSString *message = nil;
     if ([item[@"hasDetail"] boolValue]) {
@@ -380,14 +396,14 @@
             actionWithTitle:pickList[i]
             image:nil identifier:nil
             handler:^(UIAction *action) {
-                cell.detailTextLabel.text = pickKeys[i];
-                self.setPreference(self.prefSections[indexPath.section], item[@"key"], pickKeys[i]);
+                cell.detailTextLabel.text = PLLocalizedPreferenceDisplayValue(pickKeys[i], item);
+                self.setPreference(section, item[@"key"], pickKeys[i]);
                 void(^invokeAction)(NSString *) = item[@"action"];
                 if (invokeAction) {
                     invokeAction(pickKeys[i]);
                 }
             }]];
-        if ([cell.detailTextLabel.text isEqualToString:pickKeys[i]]) {
+        if ([currentValue isKindOfClass:[NSString class]] && [currentValue isEqualToString:pickKeys[i]]) {
             menuItems.lastObject.state = UIMenuElementStateOn;
         }
     }

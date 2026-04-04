@@ -12,11 +12,11 @@
 
 "game.title.exit_code" = "Game exited with code %d";
 
-// The play button
+/* The play button */
 "Play" = "Play";
 "Details" = "Details";
 
-// Version categories
+/* Version categories */
 "Installed" = "Installed";
 "Snapshot" = "Snapshot";
 "Releases" = "Releases";
@@ -24,13 +24,13 @@
 "Old-beta" = "Old-beta";
 "Old-alpha" = "Old-alpha";
 
-// Custom controls
+/* Custom controls */
 "Copy" = "Copy";
 "Edit" = "Edit";
 "Move" = "Move";
 "Remove" = "Remove";
 "Resize" = "Resize";
-// Visibility
+/* Visibility */
 "Always" = "Always";
 "In game" = "In game";
 "In menu" = "In menu";
@@ -101,7 +101,7 @@
 "login.jit.fail.description" = "No integrations could be used to automatically enable JIT on your device, and it must now be enabled manually. Errors have been logged to latestlog.txt.";
 "login.jit.fail.description_unsupported" = "An unsupported installation method has been detected. Please reinstall using one of supported methods.";
 
-// Login buttons
+/* Login buttons */
 "login.menu.sendlogs" = "Send your logs";
 "login.option.add" = "Add account";
 "login.option.select" = "Select account";
@@ -158,9 +158,9 @@
 "preference.section.control" = "Control customization";
 "preference.section.debug" = "UI Debugging settings";
 "preference.section.footer.debug" = "You may need to restart the launcher for changes to take effect.";
-//"preference.section.footer.control" = "";
+/* "preference.section.footer.control" = ""; */
 "preference.section.java" = "Java Tweaks";
-//"preference.section.footer.java" = "";
+/* "preference.section.footer.java" = ""; */
 
 "preference.title.confirm" = "Are you sure?";
 
@@ -374,13 +374,13 @@
 "preference.detail.ai_crash_fix" = "Open the AI-assisted tool to analyze crashes and suggest fixes.";
 "提示" = "Notice";
 
-// Announcement messages
+/* Announcement messages */
 "announcement.preview_version" = "Welcome to Amethyst iOS Remastered Preview Version!";
 "announcement.latest_version" = "Welcome to Amethyst iOS Remastered! This is the latest stable version.";
 "announcement.new_version_available" = "New version available: %@";
 "announcement.download_button" = "Download Now";
 
-// TouchController Preferences
+/* TouchController Preferences */
 "preference.touchcontroller.title" = "TouchController";
 "preference.touchcontroller.section.mode" = "Communication Mode";
 "preference.touchcontroller.section.info" = "Information";
@@ -405,7 +405,7 @@
 "preference.touchcontroller.vibrate.intensity.heavy" = "Heavy";
 "preference.touchcontroller.moveview.enable" = "Enable Move View";
 
-// Added localization keys
+/* Added localization keys */
 "Cancel" = "Cancel";
 "Custom" = "Custom";
 "Default" = "Default";
@@ -439,7 +439,7 @@
 "custom_controls.orientation.right" = "Right";
 "custom_controls.orientation.free" = "Free";
 
-// Preference key fallbacks
+/* Preference key fallbacks */
 "preference.detail.debug_show_layout_bounds" = "Show clip bounds, margins, and other layout edges.";
 "preference.detail.debug_show_layout_overlap" = "Overlay each view with transparent colors to reveal overlapping areas.";
 "preference.detail.enable_altkit" = "When enabled, Amethyst will try to connect to local AltServer instances to enable JIT.";
@@ -655,7 +655,7 @@
 "shaders.search.online.placeholder" = "Search Modrinth...";
 "shaders.title" = "Shaders";
 "shaders.versions.fetch_failed" = "Unable to fetch version information";
-"version_manager.delete_confirm.message" = "Delete \\"%@\\"?";
+"version_manager.delete_confirm.message" = "Delete \"%@\"?";
 "version_manager.delete_confirm.title" = "Confirm deletion";
 "version_manager.manage_mods.subtitle" = "Manage installed mods";
 "version_manager.manage_shaders" = "Shader Packs";
@@ -691,3 +691,5 @@
 "modpack.library.delete.confirm.title" = "Confirm deletion";
 "modpack.library.delete.confirm.message" = "Delete modpack \"%@\"? This action cannot be undone.";
 "modpack.library.delete.failure.title" = "Delete failed";
+
+"(default)" = "(default)";

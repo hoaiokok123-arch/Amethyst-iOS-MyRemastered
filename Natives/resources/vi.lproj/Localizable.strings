@@ -12,17 +12,17 @@
 
 "game.title.exit_code" = "Trò chơi thoát với mã %d";
 
-// The play button
+/* The play button */
 "Play" = "Chơi";
 
-// Version categories
+/* Version categories */
 "Installed" = "Đã cài đặt";
 "Snapshot" = "Snapshot";
 "Releases" = "Các bản phát hành";
 "Old-beta" = "Bản Beta cũ";
 "Old-alpha" = "Bản Alpha cũ";
 
-// Custom controls
+/* Custom controls */
 "Copy" = "Sao chép";
 "Edit" = "Chỉnh sửa";
 "Move" = "Di chuyển";
@@ -79,7 +79,7 @@
 "login.jit.fail.title" = "Không thể bật JIT trên thiết bị của bạn.";
 "login.jit.fail.description" = "Không thể sử dụng tích hợp nào để tự động bật JIT trên thiết bị của bạn và giờ đây nó phải được bật theo cách thủ công. Lỗi đã được ghi vào latestlog.txt.";
 
-// Login buttons
+/* Login buttons */
 "login.menu.sendlogs" = "Gửi nhật kí của bạn";
 "login.option.add" = "Thêm tài khoản";
 "login.option.select" = "Chọn tài khoản";
@@ -121,9 +121,9 @@
 "preference.section.control" = "Tuỳ chỉnh bộ điều khiển";
 "preference.section.debug" = "Cài đặt gỡ lỗi UI";
 "preference.section.footer.debug" = "Ngoài gỡ lỗi, những cài đặt này có thể giúp ích cho tùy biến điều khiển. Bạn có thể phải khởi động lại launcher.";
-//"preference.section.footer.control" = "";
+/* "preference.section.footer.control" = ""; */
 "preference.section.java" = "Điều chỉnh Java";
-//"preference.section.footer.java" = "";
+/* "preference.section.footer.java" = ""; */
 
 "preference.title.confirm" = "Bạn có chắc không?";
 
@@ -295,7 +295,7 @@
 "controller_configurator.playstation.title.thumb_left" = "L3";
 "controller_configurator.playstation.title.thumb_right" = "R3";
 
-// Added localization keys
+/* Added localization keys */
 "Always" = "Luôn";
 "Cancel" = "Hủy";
 "Custom" = "Tùy chỉnh";
@@ -450,7 +450,7 @@
 "custom_controls.orientation.right" = "Phải";
 "custom_controls.orientation.free" = "Tự do";
 
-// Preference key fallbacks
+/* Preference key fallbacks */
 "preference.detail.download_source" = "Chọn nguồn tải xuống cho phiên bản, mod và dữ liệu game.";
 "preference.placeholder.env_variables" = "Nhập biến môi trường...";
 "preference.section.footer" = "";
@@ -536,7 +536,7 @@
 "ai.fix.model_name" = "Tên mô hình";
 "ai.fix.modifications" = "Đã sửa %lu tệp";
 "ai.fix.not_configured" = "Chưa cấu hình";
-"ai.fix.please_configure" = "Hãy hoàn tất cấu hình API rồi nhấn \\"Lưu\\".";
+"ai.fix.please_configure" = "Hãy hoàn tất cấu hình API rồi nhấn \"Lưu\".";
 "ai.fix.ready" = "Sẵn sàng";
 "ai.fix.reject" = "Từ chối";
 "ai.fix.restart_hint" = "Hãy khởi động lại game để kiểm tra bản sửa. Nếu vẫn còn lỗi, bạn có thể tiếp tục trò chuyện hoặc gửi issue lên GitHub.";
@@ -630,7 +630,7 @@
 "shaders.search.online.placeholder" = "Tìm trên Modrinth...";
 "shaders.title" = "Shader";
 "shaders.versions.fetch_failed" = "Không thể tải thông tin phiên bản";
-"version_manager.delete_confirm.message" = "Xóa \\"%@\\"?";
+"version_manager.delete_confirm.message" = "Xóa \"%@\"?";
 "version_manager.delete_confirm.title" = "Xác nhận xóa";
 "version_manager.manage_mods.subtitle" = "Quản lý mod đã cài";
 "version_manager.manage_shaders" = "Gói shader";
@@ -666,3 +666,9 @@
 "modpack.library.delete.confirm.title" = "Xác nhận xóa";
 "modpack.library.delete.confirm.message" = "Xóa modpack \"%@\"? Thao tác này không thể hoàn tác.";
 "modpack.library.delete.failure.title" = "Xóa thất bại";
+
+"(default)" = "(mặc định)";
+"preference.profile.title.name" = "Tên";
+"preference.profile.title.version" = "Phiên bản";
+"preference.profile.title.default_touch_control" = "Điều khiển cảm ứng";
+"preference.profile.title.default_gamepad_control" = "Điều khiển tay cầm";
